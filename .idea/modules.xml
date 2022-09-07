@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/goboard-h5-react.iml" filepath="$PROJECT_DIR$/.idea/goboard-h5-react.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/goboard-sdk-react.iml" filepath="$PROJECT_DIR$/.idea/goboard-sdk-react.iml" />
     </modules>
   </component>
 </project>
