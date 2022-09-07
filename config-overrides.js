@@ -34,6 +34,22 @@ module.exports = {
         Object.assign(config.plugins[5].options, {
           filename: 'goboard.css',
         })
+
+        console.log(config.module.rules[1].oneOf[1])
+
+        config.module.rules[1].oneOf[1].use = [
+          {
+            loader: require.resolve('url-loader'),
+            options: {
+              limit: 8192,
+              name: 'static/[name].[hash:8].[ext]',
+            },
+          },
+        ]
+        // console.log(config.module.rules[1].oneOf[9].use[3])
+        // config.module.rules[1].oneOf[1].options = {
+        //   name: 'assets/[name].[hash:8].[ext]',
+        // }
       }
 
       return config

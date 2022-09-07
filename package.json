@@ -1,6 +1,7 @@
 {
   "name": "goboard-sdk-react",
   "version": "0.1.0",
+  "homepage": "dist/",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "less-loader": "^11.0.0",
@@ -41,6 +42,7 @@
   "dependencies": {
     "customize-cra": "^1.0.0",
     "customize-cra-less-loader": "^2.0.0",
-    "less": "^4.1.3"
+    "less": "^4.1.3",
+    "url-loader": "^4.1.1"
   }
 }
