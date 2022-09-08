@@ -10,7 +10,7 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 paths.appBuild = ''
 
-const exportList = ["Button"]
+const exportList = ["Button", "Logo"]
 
 module.exports = {
   paths: (paths, env) => {
@@ -35,9 +35,12 @@ module.exports = {
       if (process.env.NODE_ENV === "production") {
         config.entry = resolveApp('src/components/index.js')
         config.output.filename = 'goboard.js'
+
+
+        config.output.library = 'goboard'
         config.output.libraryTarget = 'umd'
         // config.output.libraryExport = 'default'
-        config.output.libraryExport = exportList
+        // config.output.libraryExport = exportList
         // css打包参数
         // console.log(config.plugins[5].options)
         Object.assign(config.plugins[5].options, {
