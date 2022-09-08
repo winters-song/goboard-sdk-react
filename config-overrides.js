@@ -12,6 +12,10 @@ paths.appBuild = ''
 
 module.exports = {
   paths: (paths, env) => {
+
+    if(env.NODE_ENV === "production"){
+      paths.appIndexJs = resolveApp('src/components/index.js')
+    }
     paths.appBuild = resolveApp('dist')
     return paths;
   },
@@ -26,7 +30,7 @@ module.exports = {
     (config) => {
 
       if (process.env.NODE_ENV === "production") {
-        config.entry = resolveApp('src/components/index.js')
+        // config.entry = resolveApp('src/components/index.js')
         config.output.filename = 'goboard.js'
 
         // css打包参数
@@ -35,7 +39,7 @@ module.exports = {
           filename: 'goboard.css',
         })
 
-        console.log(config.module.rules[1].oneOf[1])
+        // console.log(config.module.rules[1].oneOf[1])
 
         config.module.rules[1].oneOf[1].use = [
           {
