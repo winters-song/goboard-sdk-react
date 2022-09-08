@@ -37,9 +37,8 @@ module.exports = {
         config.output.filename = 'goboard.js'
 
 
-        config.output.library = 'goboard'
+        // config.output.library = 'goboard'
         config.output.libraryTarget = 'umd'
-        // config.output.libraryExport = 'default'
         // config.output.libraryExport = exportList
         // css打包参数
         // console.log(config.plugins[5].options)
