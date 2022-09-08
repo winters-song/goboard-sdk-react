@@ -39,7 +39,7 @@ module.exports = {
 
         // config.output.library = 'goboard'
         config.output.libraryTarget = 'umd'
-        // config.output.libraryExport = exportList
+        config.output.libraryExport = 'default'
         // css打包参数
         // console.log(config.plugins[5].options)
         Object.assign(config.plugins[5].options, {
