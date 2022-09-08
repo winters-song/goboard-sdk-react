@@ -8,5 +8,3 @@ root.render(
     <Button label={"Hello World"}/>
   </React.StrictMode>
 );
-
-export {Button}

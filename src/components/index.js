@@ -1,3 +1,4 @@
 import Button from "./Button/Button";
 
-export { Button };
+console.log("This is library")
+module.exports = {Button}
