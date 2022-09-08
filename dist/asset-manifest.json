@@ -1,11 +1,11 @@
 {
   "files": {
-    "main.css": "/dist/goboard.css",
-    "main.js": "/dist/goboard.js",
-    "assets/avatar.png": "/dist/assets/avatar.3318c7c4.png",
-    "index.html": "/dist/index.html",
-    "goboard.css.map": "/dist/goboard.css.map",
-    "goboard.js.map": "/dist/goboard.js.map"
+    "main.css": "/goboard.css",
+    "main.js": "/goboard.js",
+    "static/media/avatar.png": "/static/media/avatar.3318c7c4ec39fa24b90f.png",
+    "index.html": "/index.html",
+    "goboard.css.map": "/goboard.css.map",
+    "goboard.js.map": "/goboard.js.map"
   },
   "entrypoints": [
     "goboard.css",

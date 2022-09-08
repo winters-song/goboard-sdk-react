@@ -46,21 +46,18 @@ module.exports = {
           filename: 'goboard.css',
         })
 
-        // console.log(config.module.rules[1].oneOf[1])
+        // console.log(config.module.rules[1].oneOf[9].use[0].options.publicPath = './')
+        config.module.rules[1].oneOf[9].use[0].options.publicPath = './'
 
-        config.module.rules[1].oneOf[1].use = [
-          {
-            loader: require.resolve('url-loader'),
-            options: {
-              limit: 1,
-              name: 'assets/[name].[hash:8].[ext]',
-            },
-          },
-        ]
-        // console.log(config.module.rules[1].oneOf[9].use[3])
-        // config.module.rules[1].oneOf[1].options = {
-        //   name: 'assets/[name].[hash:8].[ext]',
-        // }
+        // config.module.rules[1].oneOf[1].use = [
+        //   {
+        //     loader: require.resolve('file-loader'),
+        //     options: {
+        //       name: 'assets/[name].[ext]',
+        //       useRelativePaths: true,
+        //     },
+        //   },
+        // ]
       }
 
       return config
