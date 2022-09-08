@@ -2,7 +2,7 @@
   "files": {
     "main.css": "/dist/goboard.css",
     "main.js": "/dist/goboard.js",
-    "static/avatar.png": "/dist/static/avatar.3318c7c4.png",
+    "assets/avatar.png": "/dist/assets/avatar.3318c7c4.png",
     "index.html": "/dist/index.html",
     "goboard.css.map": "/dist/goboard.css.map",
     "goboard.js.map": "/dist/goboard.js.map"
