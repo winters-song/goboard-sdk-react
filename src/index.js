@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import goboard from "./components";
-const {Button, Logo} = goboard
+import {Button, Logo} from "./components";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

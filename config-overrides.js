@@ -10,8 +10,6 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 paths.appBuild = ''
 
-const exportList = ["Button", "Logo"]
-
 module.exports = {
   paths: (paths, env) => {
 
