@@ -34,7 +34,8 @@ module.exports = {
         config.entry = resolveApp('src/components/index.js')
         config.output.filename = 'goboard.js'
         config.output.libraryTarget = 'umd'
-        config.output.libraryExport = ['Button']
+        config.output.libraryExport = 'default'
+        // config.output.libraryExport = ['Button']
         // css打包参数
         // console.log(config.plugins[5].options)
         Object.assign(config.plugins[5].options, {
