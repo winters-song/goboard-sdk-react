@@ -344,7 +344,7 @@ function ClassroomSitTeacher() {
     //   //   ';B[hj];W[jh];B[jg];W[he];B[ge])', 1)
     //
     //   // player.loadSgf("(;CA[utf-8]AB[dg][cf][bd][be][cc][dc][fc][gc][hd][he][gf][eh]AW[bc][cd][fd][ff][cb][ge][ec][hc][gb][gg][cg][ef][ce][ee][dd][df][eg][de][fe][gd]TR[gg]C[]AP[MultiGo:4.4.4]SZ[9]AB[fg]MULTIGOGM[1];B[ed])", 1)
-    loadTheme('black')
+    // loadTheme('black')
     //
     },1000)
   }, [])
