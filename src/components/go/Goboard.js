@@ -1,12 +1,12 @@
 import Raphael from 'raphael'
 // import $ from 'jquery'
-import blackImg from './assets/black.png'
-import whiteImg from './assets/white.png'
+import blackImg from '../assets/img/black.png'
+import whiteImg from '../assets/img/white.png'
 
-import board9Img from './assets/goboard-9.png'
-import board13Img from './assets/goboard-13.png'
-import board19Img from './assets/goboard-19.png'
-import './assets/goboard.less'
+// import board9Img from './assets/goboard-9.png'
+// import board13Img from './assets/goboard-13.png'
+// import board19Img from './assets/goboard-19.png'
+// import './assets/goboard.less'
 
 // 棋子绘制
 Raphael.fn.ball = function ({x, y, r, color, shadow, blackImg, whiteImg }) {
@@ -81,137 +81,127 @@ const markerColor = '#ef4136'
 
 export default class Goboard {
 
+	initialized = false
+
+	//是否在分支变化图上
+	branch = false
+	//分支起始步数
+	branchStep = 0
+	//变化图步数
+	branchOrders = {}
+	//sgf中默认添加的棋子数
+	addedStoneNum = 0
+	//当前棋子 key：col,row value:Piece
+	pieces = {}
+	//步数
+	orders = {}
+	//坐标
+	coordinates = {}
+	//目
+	places = {}
+	//字母标记
+	markers = {}
+	//投票
+	votes = {}
+	//历史踪迹 ，数据模型。"列行色"用逗号分隔，eg."4,3,0"
+	trace = []
+
+	currentColor = 1
+
+	whoFirst = 1
+
+	// 落子，标记 [null, 'marker']
+	clickStatus = null
+
+	currentMarker = null
+
+	// 课堂移动端键盘输入，会导致布局重新计算
+	resizeLock = false
+
+	// 当前可落子，展示虚影
+	myTurn = true
+
+	options = {
+		// aigame, class, history
+		type: '',
+
+		WIDTH : 640,
+		BOARD_WIDTH: 598,
+		PLACE_WIDTH: 10,
+		//棋子半径
+		// PIECE_RADIUS: 15,
+		// UNIT_LENGTH: 20,
+		stoneOpacity: 0.5,
+		boardSize: 19,
+		fontSize: 14,
+		fontFamily: "'PingHei', 'PingFang SC', 'Helvetica Neue', 'Helvetica', 'STHeitiSC-Light', 'Arial', sans-serif",
+
+		readonly: false,
+		// 显示手数
+		showOrder: false,
+		// 显示坐标
+		showCoordinates: false,
+		//落子辅助线
+		showHelperLines: false,
+		// 落子确认
+		playConfirm: false,
+		// 音效
+		sound: true,
+
+		resizable: true,
+		// 是否是启蒙课堂（启蒙默认不展示手数，分支也不展示）
+		isKid: false,
+
+		zoom: 1,
+
+		position: 'c', //['t', 'c'] t: top, c: center
+
+		// boardImg: board19Img,
+
+		// 使用图片棋盘样式（false时为svg绘制）
+		useBoardImg: true,
+		// svg绘制棋盘时的棋盘背景图片
+		svgBoardImg: null,
+		// svg绘制棋盘时的样式
+		style: {
+			borderColor: "#C6732F",
+			lineColor: "#C6732F",
+			bgColor: "#F9dd98"
+		},
+
+		stoneShadow: true,
+
+		coordinateColor: '#fff',
+
+		sizeSettings: {
+			9: {
+				PIECE_RADIUS: 30,
+				UNIT_LENGTH: 65,
+				fontSize: 20,
+				markerSize: 30,
+				// boardImg: board9Img
+			},
+			13: {
+				PIECE_RADIUS: 20,
+				UNIT_LENGTH: 46.4,
+				fontSize: 16,
+				markerSize: 26,
+				// boardImg: board13Img
+			},
+			19: {
+				PIECE_RADIUS: 14,
+				UNIT_LENGTH: 31,
+				fontSize: 14,
+				markerSize: 22,
+				// boardImg: board19Img
+			}
+		}
+	}
+
 	constructor(cfg) {
 		this.el = cfg.el;
 
 		window.Goboard = this
-
-		Object.assign(this, {
-
-			initialized: false,
-
-			isMobile: false,
-
-			//是否在分支变化图上
-			branch: false,
-			//分支起始步数
-			branchStep: 0,
-			//变化图步数
-			branchOrders: {},
-			//sgf中默认添加的棋子数
-			addedStoneNum: 0,
-			//当前棋子 key：col,row value:Piece
-			pieces: {},
-			//步数
-			orders: {},
-			//坐标
-			coordinates: {},
-			//目
-			places: {},
-			//字母标记
-			markers: {},
-			//投票
-			votes: {},
-			//历史踪迹 ，数据模型。"列行色"用逗号分隔，eg."4,3,0"
-			trace: [],
-
-			currentColor: 1,
-
-			whoFirst: 1,
-
-			BLACK: 1,
-			WHITE: 2,
-
-			// 落子，标记 [null, 'marker']
-			clickStatus: null,
-
-			currentMarker: null,
-
-			// 课堂移动端键盘输入，会导致布局重新计算
-			resizeLock: false,
-
-			//show dummy
-			myTurn: true,
-
-			mobileWidth: 500,
-
-			options: {
-				// aigame, class, history
-				type: '',
-
-				WIDTH : 640,
-				BOARD_WIDTH: 598,
-				PLACE_WIDTH: 10,
-				//棋子半径
-				// PIECE_RADIUS: 15,
-				// UNIT_LENGTH: 20,
-				stoneOpacity: 0.5,
-				boardSize: 19,
-				fontSize: 14,
-				fontFamily: "'PingHei', 'PingFang SC', 'Helvetica Neue', 'Helvetica', 'STHeitiSC-Light', 'Arial', sans-serif",
-
-				readonly: false,
-				// 显示手数
-				showOrder: false,
-				// 显示坐标
-				showCoordinates: false,
-				//落子辅助线
-				showHelperLines: false,
-				// 落子确认
-				playConfirm: false,
-				// 音效
-				sound: true,
-
-				resizable: true,
-				// 是否是启蒙课堂（启蒙默认不展示手数，分支也不展示）
-				isKid: false,
-
-				zoom: 1,
-
-				position: 'c', //['t', 'c'] t: top, c: center
-
-				boardImg: board19Img,
-
-				// 使用图片棋盘样式（false时为svg绘制）
-				useBoardImg: true,
-				// svg绘制棋盘时的棋盘背景图片
-				svgBoardImg: null,
-				// svg绘制棋盘时的样式
-				style: {
-					borderColor: "#C6732F",
-					lineColor: "#C6732F",
-					bgColor: "#F9dd98"
-				},
-
-				stoneShadow: true,
-
-				coordinateColor: '#fff',
-
-				sizeSettings: {
-					9: {
-						PIECE_RADIUS: 30,
-						UNIT_LENGTH: 65,
-						fontSize: 20,
-						markerSize: 30,
-						boardImg: board9Img
-					},
-					13: {
-						PIECE_RADIUS: 20,
-						UNIT_LENGTH: 46.4,
-						fontSize: 16,
-						markerSize: 26,
-						boardImg: board13Img
-					},
-					19: {
-						PIECE_RADIUS: 14,
-						UNIT_LENGTH: 31,
-						fontSize: 14,
-						markerSize: 22,
-						boardImg: board19Img
-					}
-				}
-			}
-		})
 
 		Object.assign(this.options, cfg);
 
