@@ -1,5 +1,3 @@
-import Button from "./Button/Button";
-import Logo from "./Logo/Logo";
-
+import {SgfTree,SgfNode,SgfMoveNode} from './go/SgfTree'
 console.log("This is library")
-export {Button, Logo}
+export {SgfTree, SgfNode, SgfMoveNode }

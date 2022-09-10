@@ -1,0 +1,91 @@
+/* 背景图 */
+.classroom-sit.theme-black{
+  &:before{
+    background-image: url(./bg.png);
+  }
+
+  .courseware-box {
+    //background-image: url(./courseware_bg.png);
+
+    .close-btn {
+      background-image: url(./close_btn.png);
+    }
+
+    .info .inner:before{
+      background-image: url(./footprint.png);
+    }
+
+    .info .inner:after{
+      background-image: url(./npc_courseware.png);
+      background-size: 80%;
+      width: 240px;
+      height: 130px;
+      bottom: -16px;
+      right: -50px;
+    }
+  }
+
+  .courseware-box .info .responsive-bar .confirm-btn,
+  .marker-dialog .select-bar .buttons .confirm-btn{
+    background-image: url(./option_btn.png);
+    color: #9E6E3A;
+  }
+
+
+  /* 视频区、聊天框背景 */
+  .video-box,
+  .monitor,
+  .chat-box .card
+  {
+    background-color: transparent;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.05) 100%);
+  }
+
+  /* 输入框 */
+  .chat-box .input-box, .chat-box .input-wrapper  .only-me {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+  /* 发送按钮 */
+  .chat-box .input-box .ant-btn{
+    background: #FABE00;
+    color: #9E6E3A;
+  }
+
+
+  /* 题干颜色 */
+  .courseware-box .info .inner .description,
+  .courseware-box .info .who-play,
+  .courseware-box .info .select-bar .button,
+  .marker-dialog .title,
+  .marker-dialog .select-bar .buttons .text{
+    color: #7E3F14;
+  }
+
+  /* 选择题选项 */
+  .courseware-box .info .select-bar .button{
+    background-image: url(./option_btn.png);
+  }
+
+  /* 自动应答按钮 */
+  .courseware-box .info .responsive-bar .directions .arrow{
+    color: #FFBE1C;
+  }
+  .courseware-box .info .responsive-bar .directions .arrow:hover{
+    background-color: #FFBE1C;
+    color: white;
+  }
+
+  /* 标记题 */
+  .marker-dialog{
+    border-color: #FAECC9;
+  }
+
+  .marker-dialog .select-bar .button{
+    color: #FFBE1C;
+    background-color: rgba(255, 190, 28, 0.2);
+  }
+  .marker-dialog .select-bar .button.selected, .marker-dialog .select-bar .button.confirmed{
+    background-color: #FFBE1C;
+    color: white;
+  }
+}

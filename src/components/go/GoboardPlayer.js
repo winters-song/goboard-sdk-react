@@ -17,7 +17,7 @@ const list = [
 	'eat2'
 ]
 list.forEach(item => {
-	map.set(item, require(`./src/components/assets/sound/${item}.mp3`).default)
+	map.set(item, require(`../assets/sound/${item}.mp3`))
 })
 
 Audio.init()

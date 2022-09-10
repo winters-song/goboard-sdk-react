@@ -1,0 +1,222 @@
+@main-color: #fa0;
+
+.classroom-sit-teacher{
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom:0;
+  background: black;
+  overflow: hidden;
+  font-family: "Yuanti SC", "微软雅黑", Arial, serif;
+
+  //.back-btn{
+  //  width: 100px;
+  //  height: 100px;
+  //  background: url(./assets/back-btn.png) no-repeat;
+  //  background-size: contain;
+  //  position: absolute;
+  //  left: 30px;
+  //  top: 20px;
+  //  cursor:pointer;
+  //}
+
+  .bg{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom:0;
+    background: url("../theme/black/bg_t.png") center center no-repeat;
+    background-size: cover;
+  }
+  .count-mask{
+    width: 1440px;
+    height: 1080px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: fade(black, 40);
+    overflow: hidden;
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    img{
+
+    }
+  }
+  .main{
+    width: 1440px;
+    height: 1080px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    //background: fade(white, 40);
+    overflow: hidden;
+  }
+
+  .goboard-box{
+    width: 1040px;
+    height: 1040px;
+    position: absolute;
+    left: 15%;
+    top: 4%;
+    user-select: none;
+
+    .hidden{
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    .imgboard{
+      position: absolute;
+      top: 30px;
+      bottom: 30px;
+      left: 30px;
+      right: 30px;
+      background-position: center center;
+      background-size: contain;
+      background-repeat: no-repeat;
+      border-radius: 30px;
+    }
+  }
+
+
+//  棋盘
+  .coordinate-text{
+    &.right, &.bottom{
+      display: none;
+    }
+  }
+
+//  控制栏
+
+  .bottomBar{
+    visibility: hidden;
+    opacity: 0;
+    transition: 0.4s all;
+    position: absolute;
+    bottom: 30px;
+    left: 27%;
+    text-align: center;
+
+    &.visible{
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .btn-group {
+      display: inline-block;
+      background: rgba(0, 30, 57, 0.55);
+      border-radius: 8px;
+      padding: 2px;
+    }
+
+    .btn-group + .btn-group {
+      margin-left: 20px;
+    }
+
+
+    .ant-btn-primary {
+      width: 60px;
+      height: 50px;
+      margin: 4px;
+      border: 0;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.25);
+
+      &.active, &.focus, &.hover {
+        background-color: @main-color;
+      }
+
+      img{
+        height: 30px;
+      }
+    }
+  }
+
+  .video-wrap{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #181818;
+    z-index:10;
+
+    .player{
+      height:100%;
+      width:100%;
+    }
+  }
+
+  #ppt{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #181818;
+    z-index:10;
+  }
+  .ppt-mask{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #181818;
+    .lds-dual-ring {
+      display: inline-block;
+      width: 80px;
+      height: 80px;
+    }
+    .lds-dual-ring:after {
+      content: " ";
+      display: block;
+      width: 64px;
+      height: 64px;
+      margin: 8px;
+      border-radius: 50%;
+      border-width: 6px;
+      border-color: #fff transparent #fff transparent;
+      animation: lds-dual-ring 1.2s linear infinite;
+    }
+    @keyframes lds-dual-ring {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  }
+  // ppt禁止点击的暂时解决方案
+  .ppt-forbid-click-mask{
+    position: absolute;
+    z-index: 5;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+
+
+  // 临时
+  .sidebar {
+    .btn-group{
+      margin-bottom: 10px;
+    }
+    .ant-btn {
+      margin: 5px;
+    }
+  }
+
+}

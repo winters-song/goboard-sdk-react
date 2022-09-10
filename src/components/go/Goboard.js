@@ -1095,8 +1095,9 @@ export default class Goboard {
 	//puzzle: add color
 	recoverPiece (col, row, color){
 		//校验，复原的棋子是否在历史中存在，通过倒序查找获得被吃子的序号
-		let m, key;
-		for(let i = this.trace.length-1;i>=0 ;i--){
+		let m, key,i;
+
+		for(i = this.trace.length-1;i>=0 ;i--){
 			// indexOf '15,1' -> '15,18','15,17'...
 			// indexOf '15,1,' -> '15,1,'
 			if(0 === this.trace[i].indexOf(col+','+row + ',')) {

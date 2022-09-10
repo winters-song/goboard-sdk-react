@@ -1,0 +1,26 @@
+{
+  "theme": "light",
+  "sizeSettings": {
+    "9": {
+      "PIECE_RADIUS": 27,
+      "UNIT_LENGTH": 60,
+      "fontSize": 22,
+      "markerSize": 30,
+      "boardImg": "board-9.png"
+    },
+    "13": {
+      "PIECE_RADIUS": 19,
+      "UNIT_LENGTH": 40,
+      "fontSize": 16,
+      "markerSize": 26,
+      "boardImg": "board-13.png"
+    },
+    "19": {
+      "PIECE_RADIUS": 13,
+      "UNIT_LENGTH": 27,
+      "fontSize": 14,
+      "markerSize": 22,
+      "boardImg": "board-19.png"
+    }
+  }
+}
