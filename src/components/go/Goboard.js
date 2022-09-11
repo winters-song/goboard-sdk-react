@@ -1,24 +1,15 @@
 import Raphael from 'raphael'
-// import $ from 'jquery'
 import blackImg from '../assets/img/black.png'
 import whiteImg from '../assets/img/white.png'
 
-// import board9Img from './assets/goboard-9.png'
-// import board13Img from './assets/goboard-13.png'
-// import board19Img from './assets/goboard-19.png'
-// import './assets/goboard.less'
 
 // 棋子绘制
 Raphael.fn.ball = function ({x, y, r, color, shadow, blackImg, whiteImg }) {
 	let img = color === 1 ? blackImg : whiteImg;
 
 	if(shadow){
-		// return this.set(
-		// 	this.circle(x, y + r / 6, r).attr({fill: "#000", stroke: "none", opacity: 0.2}),
-		// 	this.image(img, x - r, y - r, 2*r, 2*r)
-		// )
 		const el = this.image(img, x - r, y - r, 2*r, 2*r)
-		el.node.setAttribute('class', 'goboard-stone');
+		el.node.setAttribute('filter', 'url(#shadow)')
 		return el;
 
 	}else{
@@ -32,9 +23,9 @@ const shadow = "<svg width=\"100%\" height=\"100%\">\n" +
 	"        <defs>\n" +
 	"          <filter id=\"shadow\" x=\"-40%\" y=\"-40%\" width=\"180%\" height=\"180%\" filterUnits=\"userSpaceOnUse\">\n" +
 	"            <feGaussianBlur in=\"SourceAlpha\" stdDeviation=\"1.5\"/>\n" +
-	"            <feOffset dx=\"0\" dy=\"2\" result=\"offsetblur\"/>\n" +
+	"            <feOffset dx=\"0\" dy=\"1\" result=\"offsetblur\"/>\n" +
 	"            <feComponentTransfer>" +
-	"            	<feFuncA type=\"linear\" slope=\"0.4\"/>" +
+	"            	<feFuncA type=\"linear\" slope=\"0.5\"/>" +
 	"            </feComponentTransfer>" +
 	"            <feMerge>\n" +
 	"              <feMergeNode/>\n" +
@@ -250,7 +241,10 @@ export default class Goboard {
 		this.paper = Raphael(this.el, this.width, this.height);
 		this.paper.setViewBox(0, 0, this.options.WIDTH, this.options.WIDTH);
 		this.paper.setSize('100%', '100%');
-		// $(this.paper.canvas).append($(shadow))
+
+		let wrapper= document.createElement('div');
+		wrapper.innerHTML= shadow
+		this.paper.canvas.append(wrapper.firstChild)
 
 	}
 
