@@ -20,7 +20,7 @@ import Video from "../../../components/classroom/Video";
 import ControlBar from "../../../components/classroom/ControlBar";
 import useScale from "../../../components/common/hooks";
 import Ppt from "../../../components/classroom/Ppt";
-import {SgfTree} from "../../../components"
+import {SgfTree} from "../../../components/go/SgfTree";
 import Canvas from "../../../components/Canvas/Canvas";
 
 // 测试用开关
