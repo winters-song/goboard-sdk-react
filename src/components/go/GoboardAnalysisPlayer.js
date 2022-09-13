@@ -68,14 +68,6 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 		return -1
 	}
 
-	resumeOrder() {
-		if (this.cb.options.showOrder === true) {
-			this.cb.showOrder();
-		}else if(this.cb.options.showOrder === 'last'){
-			this.cb.showLastOrder();
-		}
-	}
-
 	// 进入试下
 	enterUserBranch () {
 		this.cb.setReadonly(false);

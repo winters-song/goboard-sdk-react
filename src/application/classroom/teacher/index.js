@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
 import './index.less'
 import {responsive1, singlemark} from "./mock";
 import {QUIZ_TYPE} from "../common/Constants";
@@ -17,51 +17,68 @@ import '../theme/forest/theme_t.css'
 import classNames from "classnames";
 import GoboardPanel from "./GoboardPanel";
 import Video from "../../../components/classroom/Video";
-import ControlBar from "../../../components/classroom/ControlBar";
 import useScale from "../../../components/common/hooks";
 import Ppt from "../../../components/classroom/Ppt";
 import {SgfTree} from "../../../components/go/SgfTree";
 import Canvas from "../../../components/Canvas/Canvas";
 
-// 测试用开关
-const controlBarEnabled = 0
-
+let initialized = false
 /*
-* 可用课程：
-*
-* 用户：13800000001
-* Uid: 321
-*
-* 课堂链接：
-* http://localhost:3000/classroom_stand?classroomId=333&stepId=1173
-* 
-* 棋灵webview测试
-* ViewUtil.showWebView('/web/gospirit_webview/classroom_stand?classroomId=333&stepId=1173')
-*
 * 课堂视频：
-* ClassroomSit.showVideo("3aabb46692df87c3bbc5c165d014eb5d_3")
+*
+* props:
+* - markerActive: bool 标记字母状态
+* - brushActive: bool 划线状态
+* - coordinatesVisible: bool 棋盘坐标是否展示
+* - order: number [0-关闭，1-显示所有手数，2-显示最后一手]
+* - theme: 主题 ['black', 'cosmos', 'forest']
+* - onReady 初始化完毕回调
+*
+*
+* ref方法：
+* goToStart: 棋谱回到开头
+* goStep: 前进、后退， 正数前进负数后退， value:[ -5, -1, 1, 5 ]
+* goToEnd: 棋谱跳到结尾
+* toggleMarker: 切换标记状态
+* clear: 清除划线和标记
+* newSgf: 新建空棋盘
+* switchBoardSize: 切换棋盘路数， value:[9, 13, 19]
+* showVideo: 播放保利威视视频，value: 视频id (example: "3aabb46692df87c3bbc5c165d014eb5d_3")
+* hideVideo: 隐藏视频
+* showPpt: 播放PPT，value: ppt地址 (example: "/ppt/b39087c3-392a-4219-8ce4-f8f2ca8d6746/ZBtNnvM6/index.html")
+* hidePpt: 隐藏PPT
+* showPhoto 播放图片（图片选择题时），value: 图片地址 (example: 'https://oss-dev.iqidao.com/child/teacher/sgf/1643270017/bbcf9361d043679b35ed31103494356c.png')
+* hidePhoto 隐藏图片
+* loadSgf: 加载棋谱 ， value: {sgf, whoPlay}
+* pptNextMove: ppt下一步
+* pptNextPage: ppt下一页
+* pptPrePage: ppt下一页
+* pptPreMove: ppt上一步
+* getPptPageInfo: 获得ppt分页信息
+* getBoardSettings: 获得棋盘设置信息
+* getSgfString:  获得当前棋谱
+* getMarkersQuizInfo: {markers, sgf} 获得当前标记题信息
+* loadTheme: 更换皮肤
+* showCount: 显示倒计时
+*
 *
 *
 * */
-function ClassroomSitTeacher() {
+function ClassroomSitTeacher(props, ref) {
 
-  const [themeCls, setThemeCls] = useState('theme-black')
+  const {markerActive, brushActive, coordinatesVisible, order=1, theme='black', onReady} = props
+  const [themeCls, setThemeCls] = useState(`theme-${theme}`)
 
   const [canvasVisible, setCanvasVisible] = useState(false)
 
   const [videoVisible, setVideoVisible] = useState(false)
   const [vid, setVid] = useState()
 
-  // 默认展示坐标
-  const [coordinatesVisible, setCoordinatesVisible] = useState(true)
-  // 默认展示手数
-  const [order, setOrder] = useState(1)
-
   const [pptVisible, setPptVisible] = useState(false)
   const [pptUrl, setPptUrl] = useState()
   const [pptPosition, setPptPosition] = useState()
 
-  const [showCountDown,setShowCountDown] = useState(false)
+  const [showCountDown, setShowCountDown] = useState(false)
   const [countImg,setCountImg] = useState(COUNT3)
 
   const pageRef = useRef()
@@ -85,150 +102,54 @@ function ClassroomSitTeacher() {
     resizeCanvas2d()
   }, [scale])
 
-
-  const controlBarListener = (cmd, val) => {
-
+  const getPlayer = (cb) => {
     const player = goboardPanelRef.current && goboardPanelRef.current.getGoboardPlayer()
-    if(!player) {
-      return
+    if(player) {
+      cb && cb(player)
     }
-    switch(cmd){
-      // 棋谱回到开头
-      case 'goToStart':
-        player.toStart()
-        break;
-      // 棋谱快进、快退（ -5, -1, 1, 5 ）
-      case 'goStep':
-        player.goStep(val)
-        break;
-      // 棋谱回到末尾
-      case 'goToEnd':
-        player.toEnd()
-        break;
-      // 标记ABCD开关
-      case 'toggleMarker':
-        if(val){
-          player.cb.startDrawMarker()
-        }else{
-          player.cb.endDrawMarker()
-          player.cb.clearMarkers()
-        }
-        break;
-      // 划线开关
-      case 'toggleBrush':
-        setCanvasVisible(val)
+  }
+
+  const goToStart = () => {
+    getPlayer(player => player.toStart())
+  }
+
+  const goToEnd = () => {
+    getPlayer(player => player.toEnd())
+  }
+  const goStep = (val) => {
+    getPlayer(player => player.goStep(val))
+  }
+  const clear = () => {
+    getPlayer(player => {
+      if(canvasVisible){
         canvasRef.current.clear()
-        break;
-      // 清除划线或标记
-      case 'clear':
-        if(canvasVisible){
-          canvasRef.current.clear()
-        }else{
-          player.cb.clearMarkers();
+      }else{
+        player.cb.clearMarkers();
+      }
+    })
+  }
+  const newSgf = () => {
+    getPlayer(player => {
+      let size = (player.cb && player.cb.options.boardSize) || 19
+      player.newSgf(size)
+    })
+  }
+  const switchBoardSize = (val) => {
+    getPlayer(player => player.switchBoardSize(val))
+  }
+  const loadSgf = (val) => {
+    getPlayer(player => {
+      let whoPlay = val.whoPlay
+      // 课件没有whoPlay，手动解析
+      if(!whoPlay){
+        const sgfTree = new SgfTree(val.sgf);
+        const firstNode = sgfTree.root.children && sgfTree.root.children[0]
+        if(firstNode){
+          whoPlay = firstNode.color
         }
-        break;
-      // 全屏
-      case 'fullscreen':
-        break;
-
-      // +============================\
-      case 'newSgf':
-        let size = (player.cb && player.cb.options.boardSize) || 19
-        player.newSgf(size)
-        break;
-      // 切换棋盘尺寸（9, 13, 19）
-      case 'switchBoardSize':
-        player.switchBoardSize(val)
-        break;
-      // 显示坐标
-      case 'showCoordinates':
-        setCoordinatesVisible(true)
-        break;
-      // 隐藏坐标
-      case 'hideCoordinates':
-        setCoordinatesVisible(false)
-        break;
-      //  手数开关： [0-关闭，1-显示所有手数，2-显示最后一手]
-      case 'setOrder':
-        setOrder(val)
-        break;
-      //  播放视频（保利威视）
-      case 'playVideo':
-        // showVideo('3aabb46692df87c3bbc5c165d014eb5d_3')
-        showVideo(val)
-        break;
-      //  关闭视频
-      case 'hideVideo':
-        hideVideo()
-        break;
-      //  播放ppt
-      case 'playPpt':
-        // showPpt('/ppt/b39087c3-392a-4219-8ce4-f8f2ca8d6746/ZBtNnvM6/index.html')
-        showPpt(val)
-        break;
-      //  关闭ppt
-      case 'hidePpt':
-        hidePpt()
-        break;
-      //  显示图片（讲解图片选择题时）
-      case 'showPhoto':
-        // showPhoto('https://oss-dev.iqidao.com/child/teacher/sgf/1643270017/bbcf9361d043679b35ed31103494356c.png')
-        showPhoto(val)
-        break;
-      //  隐藏图片
-      case 'hidePhoto':
-        hidePhoto()
-        break;
-      case 'loadSgf':
-        try{
-          const json = JSON.parse(val)
-          let whoPlay = json.whoPlay
-          // 课件没有whoPlay，手动解析
-          if(!whoPlay){
-            const sgfTree = new SgfTree(json.sgf);
-            const firstNode = sgfTree.root.children && sgfTree.root.children[0]
-            if(firstNode){
-              whoPlay = firstNode.color
-            }
-          }
-          player.loadSgf(json.sgf, whoPlay || 1)
-        }catch (e){
-          message.error('棋谱解析失败')
-        }
-        break;
-      //  红包、题目发放或收题
-      case 'quiz':
-
-        if(val === QUIZ_TYPE.RESPONSIVE){
-          player.loadSgf(responsive1.data.sgf, responsive1.whoPlay)
-        }
-        else if(val === QUIZ_TYPE.SINGLE_MARK){
-          let sgf = removeSgfMarker(singlemark.data.sgf)
-          player.loadSgf(sgf, singlemark.whoPlay)
-        }
-        break;
-      //  获取当前ABCD标记列表
-      case 'getMarkers':
-        console.info(player.cb.getMarkers().join(','))
-        break;
-      case 'pptNextMove':
-        pptNextMove()
-        break;
-      case 'pptNextPage':
-        pptNextPage()
-        break;
-      case 'pptPrePage':
-        pptPrePage()
-        break;
-      case 'pptPreMove':
-        pptPreMove()
-        break;
-      case 'loadTheme':
-        loadTheme(val)
-        break;
-      default:
-        break;
-    }
+      }
+      player.loadSgf(val.sgf, whoPlay || 1)
+    })
   }
 
   // 一解过关题，去掉答案标识
@@ -324,19 +245,20 @@ function ClassroomSitTeacher() {
   // 加载主题
   const loadTheme = (name) => {
     const {clsName, themeConfigTeacher} = getThemeByName(name)
-    goboardPanelRef.current.getGoboardPlayer().changeTheme(themeConfigTeacher)
-    setThemeCls(clsName)
 
-    const player = goboardPanelRef.current && goboardPanelRef.current.getGoboardPlayer()
-    player.newSgf(player.cb.options.boardSize)
+    getPlayer(player => {
+      setThemeCls(clsName)
+      player.changeTheme(themeConfigTeacher)
+      player.newSgf(player.cb.options.boardSize)
+      // onThemeReady && onThemeReady()
+    })
   }
 
   // 请求直播token
   useEffect(() => {
-    document.title = 'ClassroomMain'
 
     setTimeout(() => {
-    //   const player = goboardPanelRef.current && goboardPanelRef.current.getGoboardPlayer()
+      initialized = true
     //
     //   // player.loadSgf(responsive1.data.sgf, responsive1.whoPlay)
     //   // player.loadSgf('(;CA[utf-8]SZ[13]AP[MultiGo:4.4.4]MULTIGOGM[1]\n' +
@@ -344,15 +266,11 @@ function ClassroomSitTeacher() {
     //   //   ';B[hj];W[jh];B[jg];W[he];B[ge])', 1)
     //
     //   // player.loadSgf("(;CA[utf-8]AB[dg][cf][bd][be][cc][dc][fc][gc][hd][he][gf][eh]AW[bc][cd][fd][ff][cb][ge][ec][hc][gb][gg][cg][ef][ce][ee][dd][df][eg][de][fe][gd]TR[gg]C[]AP[MultiGo:4.4.4]SZ[9]AB[fg]MULTIGOGM[1];B[ed])", 1)
-    // loadTheme('black')
-    //
-    },1000)
+      onReady && onReady()
+    },10)
   }, [])
 
-  const loadSgf = (sgf) => {
-    const player = goboardPanelRef.current && goboardPanelRef.current.getGoboardPlayer()
-    player && player.loadSgf(sgf, 1)
-  }
+
   const showCount = () => {
     setShowCountDown(true)
   }
@@ -383,23 +301,65 @@ function ClassroomSitTeacher() {
     })
   },[showCountDown])
 
+
+  useEffect(() => {
+    getPlayer(player => {
+      if(!player.cb){
+        return
+      }
+      if(markerActive){
+        player.cb.startDrawMarker()
+      }else{
+        player.cb.endDrawMarker()
+        player.cb.clearMarkers()
+      }
+    })
+  }, [markerActive])
+
+  useEffect(() => {
+    if(canvasRef.current){
+      setCanvasVisible(brushActive)
+      canvasRef.current.clear()
+    }
+  }, [brushActive])
+
+
+  useEffect(() => {
+    if(theme && initialized){
+      loadTheme(theme)
+    }
+  }, [theme])
+
+
   window.ClassroomSit = {
+    goToStart,
+    goToEnd,
+    goStep,
+    newSgf,
+    switchBoardSize,
+    loadSgf,
+    clear,
     showVideo,
     hideVideo,
     showPpt,
     hidePpt,
+    pptNextMove,
+    pptNextPage,
+    pptPreMove,
+    pptPrePage,
+
     showPhoto,
     hidePhoto,
-    controlBarListener,
     getPptPageInfo,
     getBoardSettings,
     getMarkers,
     getSgfString,
     getMarkersQuizInfo,
-    loadSgf,
     showCount,
     loadTheme
   }
+
+  useImperativeHandle(ref, () => window.ClassroomSit)
 
   return <div className={classNames({
     "classroom-sit-teacher": true,
@@ -417,7 +377,6 @@ function ClassroomSitTeacher() {
                     coordinatesVisible={coordinatesVisible}
                     order={order} />
       { pptVisible && <Ppt pptUrl={pptUrl} pptPosition={pptPosition} move={pptNextMove} />}
-      { controlBarEnabled && <ControlBar visible={true} on={controlBarListener} />}
     </div>
     <Canvas ref={canvasRef} style={{zIndex:12}} visible={canvasVisible} onShow={resizeCanvas2d}/>
     { videoVisible && <Video vid={vid} />}
@@ -425,4 +384,4 @@ function ClassroomSitTeacher() {
 }
 
 
-export default React.memo(ClassroomSitTeacher)
+export default React.memo(forwardRef(ClassroomSitTeacher))

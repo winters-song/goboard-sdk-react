@@ -86,6 +86,15 @@ export default class GoboardBranchPlayer extends GoboardPlayer{
 		this.cb.hideOrder();
 	}
 
+	closeUserBranch() {
+		this.inBranch = false
+		this.cb.branch = false;
+
+		this.currentStep = this.master.branchStep
+		this.master = {}
+		this.resumeOrder()
+	}
+
 	// 保存进入分支前的主线节点
 	saveUserMaster () {
 		this.master = {
@@ -122,6 +131,8 @@ export default class GoboardBranchPlayer extends GoboardPlayer{
 		const moveResult = this.go.undo(1);
 		this.cb.trace.pop();
 
+
+
 		// if(node.isUserBranch){
 		// 	this.removeBranchNode(node)
 		// }
@@ -144,6 +155,10 @@ export default class GoboardBranchPlayer extends GoboardPlayer{
 		this.cb.currentColor = node.color;
 
 		this.currentNode = this.getPrevNode() || this.root;
+
+		if(this.inBranch && this.currentNode === this.master.branchNode){
+			this.closeUserBranch()
+		}
 
 		if (!silent) {
 

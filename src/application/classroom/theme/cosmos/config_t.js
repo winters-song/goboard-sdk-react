@@ -4,7 +4,7 @@ export const themeConfig = {
     borderColor: "#4086F0",
     bgColor: "transparent"
   },
-  svgBoardImg: require('./board_t.png').default,
+  svgBoardImg: require('./board_t.png'),
   sizeSettings: {
     9: {
       PIECE_RADIUS: 27,

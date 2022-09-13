@@ -211,14 +211,14 @@ export default {
   /* 画图时的监控 */
   listen(classname) {
     // 获取盒子需要的参数
-    let left = canvas.getBoundingClientRect().left;
-    let top = canvas.getBoundingClientRect().top;
+    // let left = canvas.getBoundingClientRect().left;
+    // let top = canvas.getBoundingClientRect().top;
     // 支持 移动端
     canvasDiv.addEventListener("touchstart", function(e){
       paint = true;
       classname && (this.className = classname);
       (e.touches) && (e = e.touches[0]);
-      addClick(e.pageX - left, e.pageY - top);
+      addClick(e.offsetX, e.offsetY);
       draw();
     });
 
@@ -227,7 +227,8 @@ export default {
         return;
       }
       (e.touches) && (e = e.touches[0]);
-      addClick(e.pageX - left, e.pageY - top, true);
+      addClick(e.offsetX, e.offsetY, true);
+      // addClick(e.pageX - left, e.pageY - top, true);
       draw();
     });
 
@@ -240,7 +241,9 @@ export default {
     canvasDiv.addEventListener("mousedown", function (e) {
       paint = true;
       classname && (this.className = classname);
-      addClick(e.pageX - left, e.pageY - top);
+      // addClick(e.pageX - left, e.pageY - top);
+      // addClick(e.pageX - left, e.pageY - top);
+      addClick(e.offsetX, e.offsetY);
       draw();
     });
 
@@ -248,7 +251,8 @@ export default {
       if (!paint) {
         return;
       }
-      addClick(e.pageX - left, e.pageY - top, true);
+      addClick(e.offsetX, e.offsetY, true);
+      // addClick(e.pageX - left, e.pageY - top, true);
       draw();
     });
 

@@ -690,4 +690,13 @@ export default class GoboardPlayer extends EventEmitter{
 		}
 		return traceSgf +")"
 	}
+
+	// 回到主线时恢复手数展示
+	resumeOrder() {
+		if (this.cb.options.showOrder === true) {
+			this.cb.showOrder();
+		}else if(this.cb.options.showOrder === 'last'){
+			this.cb.showLastOrder();
+		}
+	}
 }
