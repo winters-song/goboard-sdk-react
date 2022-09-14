@@ -72,6 +72,51 @@ module.exports = override(
   )
   ```
 
+以上如果使用了eject，则webpack.config.js配置方法：
+```javascript
+// module -> oneOf下
+{
+  test: /\.(js|mjs|jsx|ts|tsx)$/,
+  // include: paths.appSrc,
+  include: [
+    paths.appSrc,
+    paths.appNodeModules
+  ],
+  ...
+}
+```
+```javascript
+const lessRegex = /\.(less)$/;
+const lessModuleRegex = /\.module\.(less)$/;
+
+// module -> rules -> oneOf下
+{
+  // 配置 less
+  test: lessRegex,
+  exclude: lessModuleRegex,
+  use: getStyleLoaders(
+    {
+      importLoaders: 2,
+      sourceMap: isEnvProduction && shouldUseSourceMap,
+    },
+    "less-loader"
+  ),
+  sideEffects: true,
+},
+{
+  test: lessModuleRegex,
+  use: getStyleLoaders(
+    {
+      importLoaders: 2,
+      sourceMap: isEnvProduction && shouldUseSourceMap,
+      modules: true,
+      getLocalIdent: getCSSModuleLocalIdent,
+    },
+    "less-loader"
+  ),
+},
+```
+
 
 
 ## CRA创建组件库：
