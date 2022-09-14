@@ -25,6 +25,10 @@
 
 ## 安装
 
+```shell
+yarn add https://git.iqidao.com/web-sdk/goboard-sdk-react.git
+```
+
 需要配置webpack, 增加Less支持，增加对node_modules的jsx解析。为了避免暴露Webpack配置文件(eject)，推荐使用
 react-app-rewired + customize-cra。
 
@@ -117,7 +121,30 @@ const lessModuleRegex = /\.module\.(less)$/;
 },
 ```
 
+## 示例
+极简版引入棋盘应用方法：
+```javascript
 
+import {ClassroomSitTeacher} from "goboard-sdk-react/src/application";
+
+function App() {
+  return (
+    <div className="App">
+      <ClassroomSitTeacher
+        markerActive={false}
+        brushActive = {false}
+        coordinatesVisible={true}
+        order={1}
+        theme={"black"}
+        onReady={() => console.log("on ready")}
+      />
+    </div>
+  );
+}
+
+export default App;
+
+```
 
 ## CRA创建组件库：
 ```shell
