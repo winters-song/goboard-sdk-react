@@ -13,6 +13,8 @@ import {getThemeByName} from "../theme/theme";
 import '../theme/black/theme_t.css'
 import '../theme/cosmos/theme_t.css'
 import '../theme/forest/theme_t.css'
+import '../theme/grade/theme_t.css'
+import '../theme/kid/theme_t.css'
 
 import classNames from "classnames";
 import GoboardPanel from "./GoboardPanel";
@@ -31,7 +33,7 @@ let initialized = false
 * - brushActive: bool 划线状态
 * - coordinatesVisible: bool 棋盘坐标是否展示
 * - order: number [0-关闭，1-显示所有手数，2-显示最后一手]
-* - theme: 主题 ['black', 'cosmos', 'forest']
+* - theme: 主题 ['black', 'cosmos', 'forest', 'grade', 'kid']
 * - onReady 初始化完毕回调
 *
 *
@@ -256,9 +258,10 @@ function ClassroomSitTeacher(props, ref) {
 
   // 请求直播token
   useEffect(() => {
-
     setTimeout(() => {
       initialized = true
+      loadTheme(theme)
+
     //
     //   // player.loadSgf(responsive1.data.sgf, responsive1.whoPlay)
     //   // player.loadSgf('(;CA[utf-8]SZ[13]AP[MultiGo:4.4.4]MULTIGOGM[1]\n' +
@@ -266,7 +269,10 @@ function ClassroomSitTeacher(props, ref) {
     //   //   ';B[hj];W[jh];B[jg];W[he];B[ge])', 1)
     //
     //   // player.loadSgf("(;CA[utf-8]AB[dg][cf][bd][be][cc][dc][fc][gc][hd][he][gf][eh]AW[bc][cd][fd][ff][cb][ge][ec][hc][gb][gg][cg][ef][ce][ee][dd][df][eg][de][fe][gd]TR[gg]C[]AP[MultiGo:4.4.4]SZ[9]AB[fg]MULTIGOGM[1];B[ed])", 1)
-      onReady && onReady()
+
+      setTimeout(() => {
+        onReady && onReady()
+      }, 10)
     },10)
   }, [])
 

@@ -1,9 +1,6 @@
 import {ClassroomSitTeacher} from "../application";
 import React, {useRef, useState} from "react";
 import './classroom.less'
-import alphaOutlined from "../components/assets/img/icon_alpha_outlined.png";
-import brushOutlined from "../components/assets/img/icon_brush_outlined.png";
-import closeOutlined from "../components/assets/img/icon_close_outlined.png";
 
 const testSgf = '(;CA[utf-8]AB[cf][eg][ee]AW[ef][de][dd]AP[MultiGo:4.4.4]SZ[9]AB[df]MULTIGOGM[1];W[ff];B[fe];W[gf];B[hf];W[ge];B[fd];W[gd];B[fc];W[ec];B[gc];W[dc];B[hd];W[gg];B[eb];W[ed];B[db];W[fb];B[cc];W[cd];B[bd];W[be];B[ce])'
 const activeStyle ={
@@ -16,12 +13,12 @@ export default function Classroom() {
   const [brushActive, setBrushActive] = useState(false)
   const [coordinatesVisible, setCoordinatesVisible] = useState(true)
   const [order, setOrder] = useState(1)
-  const [theme, setTheme] = useState('black')
+  const [theme, setTheme] = useState('forest')
 
   const boardRef = useRef()
 
   const onReady = () => {
-    setTheme("forest")
+    // setTheme("forest")
 
     setTimeout(() => {
 
@@ -96,6 +93,10 @@ export default function Classroom() {
         <button onClick={() => setTheme("black")}>酷黑</button>
         <button onClick={() => setTheme("forest")}>森林</button>
         <button onClick={() => setTheme("cosmos")}>宇宙</button>
+      </div>
+      <div className="group">
+        <button onClick={() => setTheme("grade")}>复盘</button>
+        <button onClick={() => setTheme("kid")}>棋灵</button>
       </div>
     </div>
     <div className="center-part">
