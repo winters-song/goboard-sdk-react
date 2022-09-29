@@ -1,0 +1,518 @@
+@main-color: #fa0;
+
+@main-width: 980px;
+@bg-color: #875227;
+@border-color: #8C431C;
+@panel-color: #FEFCEF;
+
+@black-color: #3AAFFF;
+@white-color: #FF6E27;
+
+@font: "Yuanti SC", "微软雅黑", Arial, serif;
+
+.scrollbar{
+  ::-webkit-scrollbar-track-piece{
+    background-color: rgba(255, 255, 255, 0.3);
+    -webkit-border-radius:5px;
+  }
+  ::-webkit-scrollbar{
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb:vertical{
+    height:18px;
+    background-color: white;
+    -webkit-border-radius: 8px;
+    outline-offset:-2px;
+  }
+
+  ::-webkit-scrollbar-thumb:horizontal{
+    width: 18px;
+    background-color: #ccc;
+    -webkit-border-radius: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover{
+    height:18px;
+    background-color:#aaa;
+    -webkit-border-radius: 8px;
+  }
+}
+
+.page-computation{
+  user-select: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom:0;
+  //background: @bg-color;
+  overflow: hidden;
+  font-family: "Yuanti SC", "微软雅黑", Arial, serif;
+  background: @bg-color  center center no-repeat;
+  background-size: auto 100%;
+
+
+  .action-mask{
+    position: absolute;
+    left: -50%;
+    right: -50%;
+    top: 0;
+    bottom: 0;
+    z-index: 9;
+    background-color: fade(black, 50);
+    transition: 0.2s;
+    visibility: visible;
+    opacity: 1;
+
+    &.hidden{
+      visibility: hidden;
+      opacity: 0;
+    }
+    span{
+      color: white;
+      font-size: 40px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  //.bg{
+  //  position: absolute;
+  //  left: 0;
+  //  top: 0;
+  //  right: 0;
+  //  bottom:0;
+  //  background: #9d7044;
+  //  background: url("../assets/bg.png") center center no-repeat;
+  //  background-size: cover;
+  //}
+
+  .main{
+    width: 1920px;
+    height: 1080px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    //overflow: hidden;
+  }
+
+  .goboard-box{
+    position: absolute;
+    left: 60px;
+    top: 100px;
+    width: @main-width;
+    height: @main-width;
+    user-select: none;
+
+    .goboard-quiz{
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      // 需要盖过宝箱高光
+      z-index: 3;
+      .active{
+        left: 35px;
+        top: 35px;
+        right: 35px;
+        bottom: 35px;
+        overflow: hidden;
+        border-radius: 30px;
+      }
+    }
+
+    .hidden{
+      display: none;
+    }
+
+    .imgboard{
+      position: absolute;
+      top: 30px;
+      bottom: 30px;
+      left: 30px;
+      right: 30px;
+      border-radius: 50px;
+      background: #F9dd98;
+      border: 7px solid #C6732F;
+      padding: 30px;
+
+      .inner{
+        display: flex;
+        justify-content:center;
+        align-items:center;
+        height: 100%;
+      }
+
+      img{
+        max-width: 100%;
+        max-height: 100%;
+        filter: drop-shadow(0 1px 6px rgba(0,0,0,0.15));
+      }
+    }
+  }
+
+  .anim-box{
+    .board-anim{
+      position: absolute;
+      left: 85px;
+      top: 125px;
+      width: 930px;
+      height: 930px;
+      border-radius: 50px;
+      overflow: hidden;
+
+      .good-dialog .mask{
+        border-radius: 50px;
+        overflow: hidden;
+      }
+    }
+
+  }
+
+  .panel{
+    background: @panel-color;
+    border-radius: 20px;
+    box-shadow: 0 0 10px fade(black, 20);
+    padding: 20px 34px 16px;
+  }
+
+  .sidebar-right {
+    position: absolute;
+    z-index: 2;
+    width: 725px;
+    top: 135px;
+    right: 80px;
+    bottom: 35px;
+    background: #fc0;
+    border-radius: 40px;
+    padding: 34px;
+    overflow: hidden;
+    box-shadow: inset 0px -4px 6px 1px rgba(222, 158, 62, 0.8), inset 0px 2px 6px 1px rgba(222, 158, 62, 0.3), 0px 4px 6px 1px rgba(230, 173, 65, 0.2);
+
+
+    .title{
+      position: absolute;
+      width: 410px;
+      //background:url(../assets/title.png) no-repeat;
+      background-size: 100%;
+      background-position: 0 -10px;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%);
+      text-align: center;
+      font-size: 46px;
+      height: 130px;
+      padding-top: 16px;
+      color: #397ADC;
+      font-weight: bold;
+    }
+
+    .header{
+      display: flex;
+      flex-direction: row;
+      margin-top: 110px;
+
+      .page-info{
+        .panel;
+        padding: 16px 0;
+        color: @bg-color;
+        font-size: 44px;
+        margin-right: 35px;
+        width: 145px;
+        text-align: center;
+      }
+      .extra-info{
+        .panel;
+        flex: 1;
+
+        .text{
+          float: right;
+          color: fade(@bg-color, 50);
+          font-size: 30px;
+          margin-top: 8px;
+        }
+      }
+    }
+
+
+    .who-play{
+      height: 50px;
+      padding-left: 65px;
+      position: relative;
+      font-size: 36px;
+      font-weight: bold;
+      line-height: 46px;
+      margin-left: -12px;
+      margin-top: 8px;
+      color: @bg-color;
+
+      &:before{
+        position: absolute;
+        content: '';
+        left: 0;
+        top: 2px;
+        background-repeat: no-repeat;
+        background-size: contain;
+        @radius: 44px;
+        width: @radius;
+        height: @radius;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px fade(black, 60);
+      }
+
+      &.black:before{
+        //background-image: url(../assets/black.png);
+      }
+
+      &.white:before{
+        //background-image: url(../assets/white.png);
+      }
+
+      &.none{
+        display: none;
+      }
+    }
+
+
+    .details{
+      position: absolute;
+      top: 280px;
+      left: 34px;
+      right: 34px;
+      bottom: 34px;
+      padding: 22px 30px;
+      .panel;
+
+      .description{
+        color: @bg-color;
+        font-size: 34px;
+        margin-top: 15px;
+        height: 160px;
+        overflow: auto;
+        line-height: 1.5;
+      }
+
+      .result {
+        font-size: 40px;
+        text-align: center;
+        &.doing {
+          color: #3F8CFF;
+        }
+        &.success {
+          color: #1ED278;
+        }
+        &.failed {
+          color: #FE4756;
+        }
+        .icon{
+          width: 36px;
+          height: 36px;
+          display: inline-block;
+          position: relative;
+          top: 8px;
+          left: 10px;
+        }
+      }
+
+      .common-btn{
+        color: #3F8CFF;
+        font-size: 36px;
+        background-color: fade(#3F8CFF, 20);
+        border-radius: 40px;
+        padding: 12px 40px;
+        margin: 0 20px;
+        display: inline-block;
+        cursor: pointer;
+        &.disabled{
+          opacity: 0.5;
+        }
+      }
+
+      .action-bar{
+        margin-top: 60px;
+        height: 310px;
+        text-align: center;
+        position: relative;
+      }
+
+      .manual-bar{
+        .btn{
+          .common-btn;
+        }
+      }
+
+      .select-bar{
+
+        height: 375px;
+        position: relative;
+        top: -50px;
+
+        .options{
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-content: center;
+          flex-wrap: wrap;
+          height: 250px;
+        }
+
+        @bg-color: #3F8CFF;
+
+        .buttons{
+          transform: scale(0.9);
+        }
+
+        .button{
+          background: fade(@bg-color, 20);
+          border-radius: 15px;
+          text-align: center;
+          font-size: 30px;
+          background-size: contain;
+          display: inline-block;
+          cursor: pointer;
+          font-weight: bold;
+          color: @bg-color;
+          line-height: 75px;
+          margin: 10px 15px;
+          padding: 0 10px;
+          position: relative;
+          min-width: 120px;
+
+
+          &.selected, &.confirmed{
+            color: white;
+            background: @bg-color;
+          }
+
+        }
+  
+      }
+
+      .play-helper{
+        .directions{
+          height: 300px;
+          position: relative;
+          width: 330px;
+          margin: 20px;
+
+          .arrow{
+            width: 100px;
+            height: 85px;
+            text-align: center;
+            position: absolute;
+            border-radius: 10px;
+            cursor: pointer;
+            background: fade(#3F8CFF, 30);
+            z-index: 2;
+            color: #3F8CFF;
+
+            &:hover{
+              color: white;
+            }
+
+            svg{
+              position: absolute;
+              left: 50%;
+              top: 50%;
+            }
+
+            &.top{
+              left: 50%;
+              top: 0;
+              transform: translate(-50%, 0);
+              svg{
+                transform: rotate(180deg) translate(50%, 50%);
+              }
+            }
+
+            &.left{
+              left: 0;
+              top: 50%;
+              transform: translate(0, -50%);
+              svg{
+                transform: rotate(90deg) translate(-50%, 50%);
+              }
+            }
+            &.bottom{
+              left: 50%;
+              bottom: 0;
+              transform: translate(-50%, 0);
+              svg{
+                transform: translate(-50%, -50%);
+              }
+            }
+            &.right{
+              right: 0;
+              top: 50%;
+              transform: translate(0, -50%);
+              svg{
+                transform: rotate(270deg) translate(50%, -50%);
+              }
+            }
+          }
+        }
+        .buttons{
+          text-align: right;
+          bottom: 103px;
+        }
+      }
+
+      .buttons{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        .btn{
+          border-radius: 50px;
+          margin: 0 30px 10px;
+          font-weight: bold;
+          display: inline-block;
+          padding: 16px 60px;
+          font-size: 40px;
+          text-align: center;
+          cursor: pointer;
+      
+          &.btn-primary{
+            color: white;
+            background: linear-gradient(#ffac5a, #ff6e2f);
+            box-shadow: 0 4px 8px fade(#ff6e2f, 50);
+            border: 0;
+          }
+      
+          &.btn-default{
+            background-color: transparent;
+            border: 2px solid #f70;
+            color: #f70;
+          }
+
+          &.hidden{
+            visibility: hidden;
+          }
+        }
+      }
+    }
+  }
+
+
+  .good-dialog .decoration {
+    &.type-1{
+      left: 20%;
+    }
+    &.type-2{
+      left: 32%;
+    }
+    &.type-4{
+      left: 64%;
+    }
+    &.type-5{
+      left: 70%;
+    }
+  }
+
+}

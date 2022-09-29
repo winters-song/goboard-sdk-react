@@ -15,7 +15,7 @@ module.exports = {
   //
   //   if(process.env.NODE_ENV === "production"){
   //     console.log(env.NODE_ENV )
-  //     paths.appIndexJs = resolveApp('src/components/index.js')
+  //     paths.appIndexJs = resolveApp('src/components/Quiz.jsx')
   //   }
   //   paths.appBuild = resolveApp('dist')
   //   return paths;
@@ -46,7 +46,7 @@ module.exports = {
     // (config) => {
     //
     //   if (process.env.NODE_ENV === "production") {
-    //     config.entry = resolveApp('src/components/index.js')
+    //     config.entry = resolveApp('src/components/Quiz.jsx')
     //     config.output.filename = 'goboard.js'
     //
     //

@@ -8,6 +8,7 @@ export const themeConfig = {
   "svgBoardImg": require('./board_t.png'),
   "sizeSettings": {
     9: {
+      // BOARD_WIDTH: 630,
       PIECE_RADIUS: 30,
       UNIT_LENGTH: 65,
       fontSize: 20,
