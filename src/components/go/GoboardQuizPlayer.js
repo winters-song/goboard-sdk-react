@@ -74,7 +74,7 @@ export default class GoboardQuizPlayer extends GoboardPlayer{
 
 	afterAddStones(stones) {
 		if(stones && stones.length){
-			// this.clipBoard(stones)
+			this.clipBoard(stones)
 		}
 	}
 
@@ -110,110 +110,85 @@ export default class GoboardQuizPlayer extends GoboardPlayer{
 		this.setViewBox(top, bottom, left, right);
 	}
 
+	/*
+	* 棋盘需要放大多少倍？
+	* 棋盘如何平移达到剪切效果？
+	* 如何平移回中心位置？
+	* */
 	setViewBox (top, bottom, left, right) {
 		const cb = this.cb;
-		// let offset = 4;
-		// let width = cb.options.WIDTH;
+
+		// 当前棋谱取值范围（棋子+标记+答案）外扩路数
+		let offset = 4;
+		const width = cb.options.WIDTH;
 		//
-		// let unitNum = this.boardSize - 1
+		let unitNum = this.boardSize - 1
 
 		//get bound columns & rows
-		// top = top - offset < 0 ? 0 : top - offset;
-		// bottom = bottom + offset > unitNum ? unitNum : bottom + offset;
-		// left = left - offset < 0 ? 0 : left - offset;
-		// right = right + offset > unitNum ? unitNum : right + offset;
+		top = top - offset < 0 ? 0 : top - offset;
+		bottom = bottom + offset > unitNum ? unitNum : bottom + offset;
+		left = left - offset < 0 ? 0 : left - offset;
+		right = right + offset > unitNum ? unitNum : right + offset;
 
-		// console.log(top, bottom, left, right);
 
-		cb.el.parentNode.classList.add('active')
-		cb.el.style.transform = 'scale(1.8) translate(-230px,200px)'
+		// cb.el.style.transform = 'scale(1.8) translate(-230px,200px)'
 
-		// let unit = cb.options.UNIT_LENGTH;
-		//
-		// //get bound positions
-		// // originX（文字区 + 棋盘边缘）宽度, offsetX (dom实际宽度到 棋盘预设宽度640的偏移量)
-		// let bound_left = left * unit + cb.originX + cb.offsetX;
-		// let bound_top = top * unit + cb.originY + cb.offsetY;
-		// let bound_right = right * unit + cb.originX + cb.offsetX;
-		// let bound_bottom = bottom * unit + cb.originX + cb.offsetX;
-		//
-		// //是否显示棋盘边缘
-		// let corner = 0;
-		//
-		// if (left === 0) {
-		// 	bound_left = 0;
-		// 	corner += 1;
-		// }
-		// if (top === 0) {
-		// 	bound_top = 0;
-		// }
-		// if (right === unitNum) {
-		// 	bound_right = width;
-		// 	corner += 1;
-		// }
-		// if (bottom === unitNum) {
-		// 	bound_bottom = width;
-		// }
-		//
-		// const targetWidth = bound_right - bound_left;
-		// const targetHeight = bound_bottom - bound_top;
-		//
-		//
-		// cb.paper.setViewBox(bound_left, bound_top, targetWidth, targetHeight);
-		//
-		// console.log(bound_left, bound_top, targetWidth, targetHeight)
-		// // 是否是纵向
-		// let landscape = bottom - top > right - left;
-		// // 局部棋盘放大倍数
-		// let scale = cb.options.WIDTH / targetWidth;
-		// // 最终局部棋盘纵横比
-		// const ratio = targetHeight / targetWidth;
-		//
-		// this.resetParams(scale, landscape, ratio, left, top, right, bottom);
+		// debugger;
+		// cb.paper.canvas.style.transform = 'scale(2) translate(-490px,490px)'
+
+		let unit = cb.options.UNIT_LENGTH;
+		//get bound positions
+		// originX（文字区 + 棋盘边缘）宽度, offsetX (dom实际宽度到 棋盘预设宽度640的偏移量)
+		let bound_left = left * unit + cb.originX //+ cb.offsetX;
+		let bound_top = top * unit + cb.originY //+ cb.offsetY;
+		let bound_right = right * unit + cb.originX //+ cb.offsetX;
+		let bound_bottom = bottom * unit + cb.originX //+ cb.offsetX;
+
+		if(left === 0 && top === 0 && right === unitNum && bottom === unitNum){
+			// 默认展示全部棋盘
+			return
+		}
+
+		let offsetX = 0, offsetY = 0;
+		// 棋盘裁剪不可以两侧都做裁剪，只支持八个方向裁剪：上、下、左、右、左上、右上、左下、右下
+		if (left === 0 ^ right === unitNum) {
+			// 左边缘需要展示，则裁剪右边缘(向右平移)
+			if(left === 0){
+				offsetX = width - bound_right
+			}else{
+				offsetX = -bound_left
+			}
+		}
+		if (top === 0 ^ bottom === unitNum) {
+			if(top === 0){
+				offsetY = width - bound_bottom
+			}else{
+				offsetY = -bound_top
+			}
+		}
+
+		let scale = 1
+		// 按裁剪最小方向计算放大比例
+		if(Math.abs(offsetX) > Math.abs(offsetY)){
+			scale = width / (width - Math.abs(offsetY))
+		}else{
+			scale = width / (width - Math.abs(offsetX))
+		}
+
+		if(scale > 1.2){
+			scale -= 0.2
+		}
+		const ratio = cb.width / cb.options.WIDTH;
+		offsetX *= ratio / scale
+		offsetY *= ratio / scale
+		cb.el.parentNode.classList.add('clipped')
+
+		cb.paper.canvas.style.transform = `scale(${scale}) translate(${offsetX}px,${offsetY}px)`
+
+		cb.el.style.left = `${-offsetX / 2}px`
+		cb.el.style.top = `${-offsetY / 2}px`
+
 	}
 
-	resetParams (scale, landscape, ratio, left, top, right, bottom) {
-		const cb = this.cb;
 
-		let newWidth = 400, newHeight;
-		cb.el.style.width = newWidth + 'px';
-
-		if (!landscape) {
-			scale = scale / cb.options.WIDTH * newWidth;
-			newHeight = newWidth * ratio;
-
-			cb.el.style.height = newHeight+ 'px';
-		} else {
-			scale = scale / cb.options.WIDTH * newWidth;
-			newHeight = newWidth * ratio;
-
-			cb.el.style.height = newHeight+ 'px';
-		}
-
-		let unitNum = this.boardSize - 1
-		let halfNum = unitNum / 2
-
-		cb.REAL_UNIT_LENGTH = cb.options.UNIT_LENGTH * scale;
-		let borderMargin = (cb.options.WIDTH - unitNum * cb.options.UNIT_LENGTH) / 2 * scale;
-
-		if (left === 0) {
-			cb.real_originX = borderMargin;
-		} else {
-			cb.real_originX = -left * cb.REAL_UNIT_LENGTH;
-		}
-
-		if (top === 0) {
-			cb.real_originY = borderMargin;
-		} else {
-			cb.real_originY = -top * cb.REAL_UNIT_LENGTH;
-		}
-
-		cb.centerX = cb.real_originX + halfNum * cb.REAL_UNIT_LENGTH;
-		cb.centerY = cb.real_originY + halfNum * cb.REAL_UNIT_LENGTH;
-
-		cb.boundX1 = 0;
-		cb.boundX2 = newWidth;
-		cb.boundY1 = 0;
-		cb.boundY2 = newHeight;
-	}
 }

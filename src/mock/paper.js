@@ -1,7 +1,7 @@
 export const paperInfoData = {
   "openBoxCount": null,
   "boxAmount": null,
-  "answerData": [],
+  "answerData": [{}],
   "questions": [{
     "id": 2,
     "paperId": 2,
@@ -29,7 +29,10 @@ export const paperInfoData = {
     "question": "(26)",
     "options": null,
     "whoPlay": 1,
-    "sgf": "(;CA[gb2312]AB[ld][kd][jd][jc][jb][ja][lb][rb][rc][qc][la][qe][pe][oe][nd]AW[kb]\r\n[kc][mc][lc][mb][pb][pc][pd][qb][ka]N[028]AP[MultiGo:4.4.4]SZ[19]AB[md]MULTIGOGM[1]\r\n;B[oc]\r\n(;W[nc];B[ob];W[od];B[oa]C[0])\r\n(;W[ob];B[nb]C[0]))",
+    // "sgf": "(;CA[gb2312]AB[ld][kd][jd][jc][jb][ja][lb][rb][rc][qc][la][qe][pe][oe][nd]AW[kb]\r\n[kc][mc][lc][mb][pb][pc][pd][qb][ka]N[028]AP[MultiGo:4.4.4]SZ[19]AB[md]MULTIGOGM[1]\r\n;B[oc]\r\n(;W[nc];B[ob];W[od];B[oa]C[0])\r\n(;W[ob];B[nb]C[0]))",
+    // "sgf": "(;GM[1]FF[4]CA[UTF-8]AP[Sabaki:0.51.1]KM[7.5]SZ[19]DT[2022-09-29]AB[dp][cn][cq]AW[fq][dr];B[iq])",
+    // "sgf": "(;GM[1]FF[4]CA[UTF-8]AP[Sabaki:0.51.1]KM[7.5]SZ[19]DT[2022-09-29]AB[pp][qn]AW[pr][nq][kq];B[qq])",
+    "sgf": "(;GM[1]FF[4]CA[UTF-8]AP[Sabaki:0.51.1]KM[7.5]SZ[19]DT[2022-09-29]AB[pd][nc][qc]AW[qf][rd];B[qi])",
     "answer": null,
     "openBoxCount": null
   },

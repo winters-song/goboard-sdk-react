@@ -116,7 +116,12 @@
       bottom: 0;
       // 需要盖过宝箱高光
       z-index: 3;
-      .active{
+
+      &.clipped:before{
+        content : "";
+        position: absolute;
+        background: rgb(249, 221, 152);
+        opacity: 0.1;
         left: 35px;
         top: 35px;
         right: 35px;
@@ -124,6 +129,11 @@
         overflow: hidden;
         border-radius: 30px;
       }
+    }
+
+    .goboard{
+      overflow: hidden;
+      position: relative;
     }
 
     .hidden{
