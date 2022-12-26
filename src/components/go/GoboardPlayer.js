@@ -65,7 +65,9 @@ export default class GoboardPlayer extends EventEmitter{
 		Object.assign(this, {
 			currentStep: 0,
 			root: cfg.sgfTree.root,
-			currentNode: cfg.sgfTree.root
+			currentNode: cfg.sgfTree.root,
+			blackCaptures : 0,
+			whiteCaptures : 0
 		},cfg)
 
 		// this.fullSgfTree = cfg.fullSgf ? new SgfTree(cfg.fullSgf) : null
