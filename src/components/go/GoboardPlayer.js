@@ -264,11 +264,21 @@ export default class GoboardPlayer extends EventEmitter{
 	}
 
 	onMove () {
-		this.emit('move', {
-			currentStep: this.currentStep,
-			currentNode: this.currentNode,
-			totalStep: this.totalStep
-		});
+
+		if(this.inBranch && this.master){
+			this.emit('move', {
+				currentStep: this.currentStep - this.master.branchStep,
+				currentNode: this.currentNode,
+				totalStep: this.currentStep - this.master.branchStep
+			});
+		}else{
+
+			this.emit('move', {
+				currentStep: this.currentStep,
+				currentNode: this.currentNode,
+				totalStep: this.totalStep
+			});
+		}
 	}
 
 	/**

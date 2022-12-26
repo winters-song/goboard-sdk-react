@@ -12,7 +12,7 @@ const orderMap = {
 }
 
 function GoboardPanel (props, ref){
-  const {coordinatesVisible, order} = props
+  const {coordinatesVisible, order, onLoad} = props
   const [goboardPlayer, setGoboardPlayer] = useState()
 
   const orderRef = useRef(order)
@@ -65,7 +65,9 @@ function GoboardPanel (props, ref){
       }
     });
     setGoboardPlayer(player)
+
     playerRef.current = player
+    onLoad && onLoad(player)
   }
 
   const getGoboardPlayer = () => {

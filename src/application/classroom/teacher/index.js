@@ -24,7 +24,6 @@ import Ppt from "../../../components/classroom/Ppt";
 import {SgfTree} from "../../../components/go/SgfTree";
 import Canvas from "../../../components/Canvas/Canvas";
 
-let initialized = false
 /*
 * 课堂视频：
 *
@@ -71,6 +70,8 @@ function ClassroomSitTeacher(props, ref) {
   const {markerActive, brushActive, coordinatesVisible, order=1, theme='black', onReady} = props
   const [themeCls, setThemeCls] = useState(`theme-${theme}`)
 
+  const [player, setPlayer] = useState()
+
   const [canvasVisible, setCanvasVisible] = useState(false)
 
   const [videoVisible, setVideoVisible] = useState(false)
@@ -112,35 +113,36 @@ function ClassroomSitTeacher(props, ref) {
   }
 
   const goToStart = () => {
-    getPlayer(player => player.toStart())
+    player && player.toStart()
   }
 
   const goToEnd = () => {
-    getPlayer(player => player.toEnd())
+    player && player.toEnd()
   }
   const goStep = (val) => {
-    getPlayer(player => player.goStep(val))
+    player && player.goStep(val)
   }
   const clear = () => {
-    getPlayer(player => {
+    if(player) {
       if(canvasVisible){
         canvasRef.current.clear()
       }else{
         player.cb.clearMarkers();
       }
-    })
+    }
   }
   const newSgf = () => {
-    getPlayer(player => {
+    if(player) {
       let size = (player.cb && player.cb.options.boardSize) || 19
       player.newSgf(size)
-    })
+    }
   }
   const switchBoardSize = (val) => {
-    getPlayer(player => player.switchBoardSize(val))
+    player && player.switchBoardSize(val)
   }
+
   const loadSgf = (val) => {
-    getPlayer(player => {
+    if(player) {
       let whoPlay = val.whoPlay
       // 课件没有whoPlay，手动解析
       if(!whoPlay){
@@ -151,13 +153,13 @@ function ClassroomSitTeacher(props, ref) {
         }
       }
       player.loadSgf(val.sgf, whoPlay || 1)
-    })
+    }
   }
 
   // 一解过关题，去掉答案标识
-  const removeSgfMarker = (sgf) => {
-    return sgf.replace(/CR(\[\w+\])+/, '')
-  }
+  // const removeSgfMarker = (sgf) => {
+  //   return sgf.replace(/CR(\[\w+\])+/, '')
+  // }
 
   // 视频
   const showVideo = (vid) => {
@@ -184,23 +186,15 @@ function ClassroomSitTeacher(props, ref) {
 
   const pptNextMove = () => {
     window.frames[0].frame.forward2()
-    // this.send('pptPosition', {pptPosition:JSON.parse(window.frames[0].frame.snapshot())})
-    // this.getPPTPage()
   }
   const pptNextPage = () => {
     window.frames[0].frame.nextSlide()
-    // this.send('pptPosition', {pptPosition:JSON.parse(window.frames[0].frame.snapshot())})
-    // this.getPPTPage()
   }
   const pptPrePage = () => {
     window.frames[0].frame.prevSlide()
-    // this.send('pptPosition', {pptPosition:JSON.parse(window.frames[0].frame.snapshot())})
-    // this.getPPTPage()
   }
   const pptPreMove = () => {
     window.frames[0].frame.backward2()
-    // this.send('pptPosition', {pptPosition:JSON.parse(window.frames[0].frame.snapshot())})
-    // this.getPPTPage()
   }
 
   const getPptPageInfo = () => {
@@ -209,7 +203,6 @@ function ClassroomSitTeacher(props, ref) {
   }
 
   const getBoardSettings = () => {
-    const player = goboardPanelRef.current && goboardPanelRef.current.getGoboardPlayer()
     if(!player) {
       return
     }
@@ -222,7 +215,6 @@ function ClassroomSitTeacher(props, ref) {
   }
 
   const getMarkers = () => {
-    const player = goboardPanelRef.current && goboardPanelRef.current.getGoboardPlayer()
     if(!player) {
       return
     }
@@ -230,7 +222,6 @@ function ClassroomSitTeacher(props, ref) {
   }
 
   const getSgfString = () => {
-    const player = goboardPanelRef.current && goboardPanelRef.current.getGoboardPlayer()
     if(!player) {
       return
     }
@@ -248,38 +239,28 @@ function ClassroomSitTeacher(props, ref) {
   const loadTheme = (name) => {
     const {clsName, themeConfigTeacher} = getThemeByName(name)
 
-    getPlayer(player => {
+    if(player) {
       setThemeCls(clsName)
       player.changeTheme(themeConfigTeacher)
       player.newSgf(player.cb.options.boardSize)
       // onThemeReady && onThemeReady()
+    }
+  }
+
+  const onPlayerLoaded = (p) => {
+    setPlayer(p)
+
+    p.on('move', (v) => {
+      console.log("currentStep", v.currentStep, "totalStep", v.totalStep)
     })
   }
 
-  // 请求直播token
-  useEffect(() => {
-    setTimeout(() => {
-      initialized = true
-      loadTheme(theme)
-
-    //
-    //   // player.loadSgf(responsive1.data.sgf, responsive1.whoPlay)
-    //   // player.loadSgf('(;CA[utf-8]SZ[13]AP[MultiGo:4.4.4]MULTIGOGM[1]\n' +
-    //   //   ';B[gg];W[hg];B[hh];W[gh];B[fh];W[gi];B[ig];W[hf];B[gf];W[ih];B[hi];W[fi];B[ei];W[gj]\n' +
-    //   //   ';B[hj];W[jh];B[jg];W[he];B[ge])', 1)
-    //
-    //   // player.loadSgf("(;CA[utf-8]AB[dg][cf][bd][be][cc][dc][fc][gc][hd][he][gf][eh]AW[bc][cd][fd][ff][cb][ge][ec][hc][gb][gg][cg][ef][ce][ee][dd][df][eg][de][fe][gd]TR[gg]C[]AP[MultiGo:4.4.4]SZ[9]AB[fg]MULTIGOGM[1];B[ed])", 1)
-
-      setTimeout(() => {
-        onReady && onReady()
-      }, 10)
-    },10)
-  }, [])
 
 
   const showCount = () => {
     setShowCountDown(true)
   }
+
   useEffect(() => {
     let timer
     if(showCountDown){
@@ -309,7 +290,7 @@ function ClassroomSitTeacher(props, ref) {
 
 
   useEffect(() => {
-    getPlayer(player => {
+    if(player) {
       if(!player.cb){
         return
       }
@@ -319,7 +300,7 @@ function ClassroomSitTeacher(props, ref) {
         player.cb.endDrawMarker()
         player.cb.clearMarkers()
       }
-    })
+    }
   }, [markerActive])
 
   useEffect(() => {
@@ -331,10 +312,14 @@ function ClassroomSitTeacher(props, ref) {
 
 
   useEffect(() => {
-    if(theme && initialized){
+    if(theme && player){
       loadTheme(theme)
+
+      setTimeout(() => {
+        onReady && onReady()
+      }, 10)
     }
-  }, [theme])
+  }, [theme, player])
 
 
   window.ClassroomSit = {
@@ -379,9 +364,12 @@ function ClassroomSitTeacher(props, ref) {
     }
     <div className="main" style={{'transform': `translate(-50%, -50%) scale(${scale})`}}>
       <div className="bg" />
-      <GoboardPanel ref={goboardPanelRef}
-                    coordinatesVisible={coordinatesVisible}
-                    order={order} />
+      <GoboardPanel
+        ref={goboardPanelRef}
+        coordinatesVisible={coordinatesVisible}
+        order={order}
+        onLoad={onPlayerLoaded}
+      />
       { pptVisible && <Ppt pptUrl={pptUrl} pptPosition={pptPosition} move={pptNextMove} />}
     </div>
     <Canvas ref={canvasRef} style={{zIndex:12}} visible={canvasVisible} onShow={resizeCanvas2d}/>
