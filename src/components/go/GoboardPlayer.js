@@ -66,8 +66,6 @@ export default class GoboardPlayer extends EventEmitter{
 			currentStep: 0,
 			root: cfg.sgfTree.root,
 			currentNode: cfg.sgfTree.root,
-			blackCaptures : 0,
-			whiteCaptures : 0
 		},cfg)
 
 		// this.fullSgfTree = cfg.fullSgf ? new SgfTree(cfg.fullSgf) : null
@@ -616,8 +614,6 @@ export default class GoboardPlayer extends EventEmitter{
 		this.currentStep = 0;
 		this.currentNode = this.root;
 
-		this.blackCaptures = 0;
-		this.whiteCaptures = 0;
 		this.go = new Go(this.boardSize);
 		this.cb.clearBoard();
 		this.cb.clearMarkers();
