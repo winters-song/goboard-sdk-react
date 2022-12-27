@@ -535,6 +535,25 @@ export class Go {
 
     return prefix + s + ')';
   }
+
+  getCaptureSize(color) {
+    if(color ===Color.BLACK){
+      return this._getCaptureSize(this.blackCaptures)
+    }
+    if(color ===Color.WHITE){
+      return this._getCaptureSize(this.whiteCaptures)
+    }
+  }
+  // 获取吃子数量
+  _getCaptureSize (map) {
+    var i = 0;
+    map.forEach(function (strs) {
+      strs.forEach(function (str) {
+        i += str.vertexes.size;
+      });
+    });
+    return i;
+  }
 }
 
 // exports.Str = Str
