@@ -1,8 +1,8 @@
 import React from "react";
 import { RESULT } from "./Constants";
 
-import IconRight from 'components/assets/img/icon-right'
-import IconWrong from 'components/assets/img/icon-wrong'
+import IconRight from '@/components/assets/img/icon-right'
+import IconWrong from '@/components/assets/img/icon-wrong'
 
 function ResultBar(props) {
   const {result} = props

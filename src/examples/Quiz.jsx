@@ -10,12 +10,12 @@
 * */
 import React, {useRef, useState, useEffect} from "react";
 
-import PuzzleInfo from "components/quiz/PuzzleInfo";
+import PuzzleInfo from "@/components/quiz/PuzzleInfo";
 
 import {message} from "antd";
-import useScale from "components/common/hooks";
-import GoboardPanel from "components/quiz/GoboardPanel";
-import {paperInfoData} from 'mock/paper'
+import useScale from "@/components/common/hooks";
+import GoboardPanel from "@/components/quiz/GoboardPanel";
+import {paperInfoData} from '@/mock/paper'
 import './quiz.less'
 
 function Quiz () {

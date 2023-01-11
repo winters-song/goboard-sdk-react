@@ -2,7 +2,7 @@
 const {override} = require('customize-cra')
 const addLessLoader = require("customize-cra-less-loader");
 const {paths} = require("react-app-rewired");
-// const path = require('path');
+const path = require('path');
 // const fs = require('fs');
 
 // const appDirectory = fs.realpathSync(process.cwd());
@@ -29,6 +29,14 @@ module.exports = {
     }),
 
     (config) => {
+      config.resolve = {
+        ...config.resolve,
+        alias: {
+          ...config.alias,
+          '@': path.resolve(__dirname, 'src'),
+        },
+      }
+
       // 查找jsx,tsx loader，增加对子模块的编译
       const loaders = config.module.rules[1].oneOf
       for(let i = 0; i< loaders.length; i++ ){

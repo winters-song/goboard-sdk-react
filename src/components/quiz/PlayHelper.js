@@ -1,5 +1,5 @@
 import React from "react";
-import ArrowIcon from "components/assets/ArrowIcon";
+import ArrowIcon from "@/components/assets/ArrowIcon";
 
 export default function PlayHelper(props){
   const {moveHelperLine, onConfirm} = props

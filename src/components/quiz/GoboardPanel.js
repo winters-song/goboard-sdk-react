@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect, useImperativeHandle, forwardRef} from "react";
-import GoboardPlayer from 'components/go/GoboardQuizPlayer'
+import GoboardPlayer from '@/components/go/GoboardQuizPlayer'
 import classNames from "classnames";
 
 function GoboardPanel (props, ref){

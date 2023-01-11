@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {SgfTree} from "components/go/SgfTree"
+import {SgfTree} from "@/components/go/SgfTree"
 import ManualBar from './ManualBar'
 import SelectBar from "./SelectBar";
 import ResponsiveBar from "./ResponsiveBar";

@@ -1,11 +1,11 @@
 // 摆图题
 import React, {useState, useEffect} from "react";
 import classnames from "classnames";
-import {SgfTree} from 'components/go/SgfTree'
+import {SgfTree} from '@/components/go/SgfTree'
 import { RESULT } from "./Constants";
 import ResultBar from "./ResultBar";
 import PlayHelper from "./PlayHelper";
-import {checkUserAnswer} from "utils/go";
+import {checkUserAnswer} from "@/utils/go";
 
 function ManualBar(props) {
   const {data, goboardPlayer, onReset, onComplete} = props

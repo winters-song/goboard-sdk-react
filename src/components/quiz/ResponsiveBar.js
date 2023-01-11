@@ -1,6 +1,6 @@
 // 自动应答题
 import React, {useState, useEffect} from "react";
-import {AutoPlayStatus, SgfTree} from "components/go/SgfTree"
+import {AutoPlayStatus, SgfTree} from "@/components/go/SgfTree"
 import { RESULT } from "./Constants";
 import ResultBar from "./ResultBar";
 import PlayHelper from "./PlayHelper";

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Classroom from "examples/Classroom";
-import Quiz from "examples/Quiz";
+import Classroom from "./examples/Classroom";
+import Quiz from "./examples/Quiz";
 import {BrowserRouter, Link} from 'react-router-dom';
 import {Route, Routes} from "react-router";
 

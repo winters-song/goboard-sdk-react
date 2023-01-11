@@ -1,4 +1,4 @@
-import {SgfTree} from 'components/go/SgfTree'
+import {SgfTree} from '@/components/go/SgfTree'
 
 
 /*

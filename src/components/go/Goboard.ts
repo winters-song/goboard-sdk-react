@@ -1,39 +1,54 @@
-import Raphael from 'raphael'
+import Raphael, {RaphaelElement, RaphaelPaper, RaphaelSet} from 'raphael'
 import blackImg from '../assets/img/black.png'
 import whiteImg from '../assets/img/white.png'
 
 
+interface IBall {
+	x:number,
+	y:number,
+	r:number,
+	color:number,
+	shadow:boolean,
+	blackImg: string,
+	whiteImg: string
+}
+
 // 棋子绘制
-Raphael.fn.ball = function ({x, y, r, color, shadow, blackImg, whiteImg }) {
+function ball (paper: RaphaelPaper, props: IBall) {
+	const { x, y, r, color, shadow, blackImg, whiteImg } = props
 	let img = color === 1 ? blackImg : whiteImg;
 
 	if(shadow){
-		const el = this.image(img, x - r, y - r, 2*r, 2*r)
-		el.node.setAttribute('filter', 'url(#shadow)')
-		return el;
+		return paper.set(
+			paper.circle(x, y + r / 8, r).attr({fill: "#000", stroke: "none", opacity: 0.2}),
+			paper.image(img, x - r, y - r, 2*r, 2*r)
+		)
+		// const el = paper.image(img, x - r, y - r, 2*r, 2*r)
+		// el.node.setAttribute('class', 'goboard-stone');
+		// return el;
 
 	}else{
-		return this.image(img, x - r, y - r, 2*r, 2*r)
+		return paper.image(img, x - r, y - r, 2*r, 2*r)
 	}
 
 };
 
 
-const shadow = "<svg width=\"100%\" height=\"100%\">\n" +
-	"        <defs>\n" +
-	"          <filter id=\"shadow\" x=\"-40%\" y=\"-40%\" width=\"180%\" height=\"180%\" filterUnits=\"userSpaceOnUse\">\n" +
-	"            <feGaussianBlur in=\"SourceAlpha\" stdDeviation=\"1.5\"/>\n" +
-	"            <feOffset dx=\"0\" dy=\"1\" result=\"offsetblur\"/>\n" +
-	"            <feComponentTransfer>" +
-	"            	<feFuncA type=\"linear\" slope=\"0.5\"/>" +
-	"            </feComponentTransfer>" +
-	"            <feMerge>\n" +
-	"              <feMergeNode/>\n" +
-	"              <feMergeNode in=\"SourceGraphic\"/>\n" +
-	"            </feMerge>\n" +
-	"          </filter>\n" +
-	"        </defs>\n" +
-	"      </svg>"
+// const shadow = "<svg width=\"100%\" height=\"100%\">\n" +
+// 	"        <defs>\n" +
+// 	"          <filter id=\"shadow\" x=\"-40%\" y=\"-40%\" width=\"180%\" height=\"180%\" filterUnits=\"userSpaceOnUse\">\n" +
+// 	"            <feGaussianBlur in=\"SourceAlpha\" stdDeviation=\"1.5\"/>\n" +
+// 	"            <feOffset dx=\"0\" dy=\"1\" result=\"offsetblur\"/>\n" +
+// 	"            <feComponentTransfer>" +
+// 	"            	<feFuncA type=\"linear\" slope=\"0.5\"/>" +
+// 	"            </feComponentTransfer>" +
+// 	"            <feMerge>\n" +
+// 	"              <feMergeNode/>\n" +
+// 	"              <feMergeNode in=\"SourceGraphic\"/>\n" +
+// 	"            </feMerge>\n" +
+// 	"          </filter>\n" +
+// 	"        </defs>\n" +
+// 	"      </svg>"
 
 const BoardEvents = [
 	{ key: 'mousedown', name: 'onMouseDown', handler: 'mouseDownHandler'},
@@ -95,16 +110,16 @@ export default class Goboard {
 	//投票
 	votes = {}
 	//历史踪迹 ，数据模型。"列行色"用逗号分隔，eg."4,3,0"
-	trace = []
+	trace: string[] = []
 
 	currentColor = 1
+	clientColor = 1
 
 	whoFirst = 1
 
 	// 落子，标记 [null, 'marker']
-	clickStatus = null
-
-	currentMarker = null
+	clickStatus = ''
+	currentMarker = ''
 
 	// 课堂移动端键盘输入，会导致布局重新计算
 	resizeLock = false
@@ -113,6 +128,8 @@ export default class Goboard {
 	myTurn = true
 
 	options = {
+		clientColor: 1,
+		whoFirst: 1,
 		// aigame, class, history
 		type: '',
 
@@ -120,16 +137,17 @@ export default class Goboard {
 		BOARD_WIDTH: 598,
 		PLACE_WIDTH: 10,
 		//棋子半径
-		// PIECE_RADIUS: 15,
-		// UNIT_LENGTH: 20,
+		PIECE_RADIUS: 15,
+		UNIT_LENGTH: 20,
 		stoneOpacity: 0.5,
 		boardSize: 19,
 		fontSize: 14,
+		markerSize: 22,
 		fontFamily: "'PingHei', 'PingFang SC', 'Helvetica Neue', 'Helvetica', 'STHeitiSC-Light', 'Arial', sans-serif",
 
 		readonly: false,
 		// 显示手数
-		showOrder: false,
+		showOrder: <any>false,
 		// 显示坐标
 		showCoordinates: false,
 		//落子辅助线
@@ -147,22 +165,28 @@ export default class Goboard {
 
 		position: 'c', //['t', 'c'] t: top, c: center
 
+		boardImg: '',
+
 		// boardImg: board19Img,
 
 		// 使用图片棋盘样式（false时为svg绘制）
 		useBoardImg: true,
 		// svg绘制棋盘时的棋盘背景图片
-		svgBoardImg: null,
+		svgBoardImg: '',
 		// svg绘制棋盘时的样式
 		style: {
 			borderColor: "#C6732F",
 			lineColor: "#C6732F",
-			bgColor: "#F9dd98"
+			bgColor: "#F9dd98",
+			kid: false,
+			borderWidth:5,
+			lineWidth: 2
 		},
 
 		stoneShadow: true,
 
 		coordinateColor: '#fff',
+		coordinateDistance: 13,
 
 		sizeSettings: {
 			9: {
@@ -189,10 +213,67 @@ export default class Goboard {
 		}
 	}
 
-	constructor(cfg) {
+	el: HTMLDivElement
+	paper?: RaphaelPaper
+	dummy?: RaphaelElement
+	markerDummy?: RaphaelElement
+	head?: RaphaelElement
+	drawCache?: RaphaelSet
+	boardMesh?: RaphaelElement
+	// pivot: RaphaelElement
+
+	helperLinePos=[0,0]
+	helperLineX?: RaphaelElement
+	helperLineY?: RaphaelElement
+	helperLineCircle?: RaphaelElement
+	helperLineDummy?: RaphaelElement
+	lastStepText?: RaphaelElement
+	helperShowed=false
+	blackImg
+	whiteImg
+	width = 0
+	height = 0
+
+	offsetX=0
+	offsetY=0
+	originX=0
+	originY=0
+	REAL_UNIT_LENGTH=0
+	centerX=0
+	centerY=0
+	real_originX=0
+	real_originY=0
+
+	boundX1=0
+	boundX2=0
+	boundY1=0
+	boundY2=0
+
+	resizeTimer = 0
+
+	boardStatus=0
+
+	moveCounter=0
+
+	intersects = false;
+	mouse = {
+		x: 0,
+		y: 0
+	}
+	mouse_co = {
+		col: 0,
+		row: 0
+	}
+
+	onUpdateHelperLineCb = ( col:number, row:number) => {}
+	onMarkCb = ( currentMarker: string, col:number, row:number) => {}
+	onMarkDeadCb = ( col:number, row:number) => {}
+	onPlayCb = ( color: number, col:number, row:number) => {}
+
+	constructor(cfg: any) {
 		this.el = cfg.el;
 
-		window.Goboard = this
+		// window.Goboard = this
 
 		Object.assign(this.options, cfg);
 
@@ -210,7 +291,7 @@ export default class Goboard {
 		// 棋盘比例、位置初始化
 		this.initPosition();
 		// 创建棋盘辅助中心点
-		this.initHelper();
+		// this.initHelper();
 		// 初始化单元格宽度、偏移量
 		this.initParams();
 
@@ -235,22 +316,26 @@ export default class Goboard {
 		// 设置宽高
 		this.height = this.width = this.options.WIDTH;
 
-		this.el.style.width = this.width;
-		this.el.style.height = this.height;
+		this.el.style.width = String(this.width);
+		this.el.style.height = String(this.height);
 
 		this.paper = Raphael(this.el, this.width, this.height);
 		this.paper.setViewBox(0, 0, this.options.WIDTH, this.options.WIDTH);
+		// @ts-ignore
 		this.paper.setSize('100%', '100%');
 
-		let wrapper= document.createElement('div');
-		wrapper.innerHTML= shadow
-		this.paper.canvas.append(wrapper.firstChild)
+		// let wrapper= document.createElement('div');
+		// wrapper.innerHTML= shadow
+		// this.paper.canvas.append(wrapper.firstChild)
 
 	}
 
 	initPosition (){
-		this.width = this.el.parentNode.clientWidth
-		this.height = this.el.parentNode.clientHeight
+		if(!this.el.parentNode){
+			return
+		}
+		this.width = this.el.parentNode['clientWidth']
+		this.height = this.el.parentNode['clientHeight']
 
 		// 中心到边界格数
 		const grids = (this.options.boardSize - 1) / 2;
@@ -280,23 +365,15 @@ export default class Goboard {
 
 		const dw = this.width * ratio;
 		const dh = this.height * ratio;
-		this.paper.setViewBox(this.offsetX, this.offsetY, dw, dh);
-
-		// if(me.options.position === 'c'){
-		// 	var screen_width = me.$el.parent().width();
-		// 	// var screen_height = $(window).height();
-
-		// 	var offsetX = (screen_width - me.width) / 2;
-		// 	me.el.style.marginLeft =  offsetX
-		// }
+		this.paper?.setViewBox(this.offsetX, this.offsetY, dw, dh);
 
 	}
 
-	initHelper () {
-		const x = this.width / 2;
-		this.pivot = this.paper.circle(x, x, 0);
-		this.pivot.attr('id', 'pivot');
-	}
+	// initHelper () {
+	// 	const x = this.width / 2;
+	// 	this.pivot = this.paper?.circle(x, x, 0);
+	// 	this.pivot.attr('id', 'pivot');
+	// }
 
 	initParams () {
 		const ratio = this.width / this.options.WIDTH;
@@ -319,6 +396,9 @@ export default class Goboard {
 
 	// 使用棋盘图片或绘制棋盘
 	initChessBoard () {
+		if(!this.paper){
+			return
+		}
 		const width = this.options.BOARD_WIDTH;
 		const x = this.centerX - width / 2;
 		const y = this.centerY - width / 2;
@@ -327,13 +407,12 @@ export default class Goboard {
 		if(this.options.useBoardImg){
 			this.boardMesh = this.paper.image(this.options.boardImg, x, y, width, width);
 		}else{
-			const {lineColor, borderColor, bgColor, kid} = this.options.style
+			const {lineColor, borderColor, bgColor, kid, borderWidth=5, lineWidth=2} = this.options.style
 
 			if(this.drawCache){
 				this.clearDrawCache()
 			}
 			this.drawCache = this.paper.set();
-
 
 			// 背景图
 			if(this.options.svgBoardImg) {
@@ -341,15 +420,16 @@ export default class Goboard {
 			}else{
 				// 背景色
 				this.boardMesh = this.paper.rect(x, y, width, width, width / 20)
-				this.boardMesh.attr({
+				// @ts-ignore
+				this.boardMesh?.attr({
 					fill: kid ? lineColor: bgColor,
 					stroke: borderColor,
-					'stroke-width': '5px'
+					'stroke-width': `${borderWidth}px`
 				})
 			}
-			this.drawCache.push(this.boardMesh)
-
-
+			if(this.boardMesh){
+				this.drawCache?.push(this.boardMesh)
+			}
 
 			// 1线
 			const x0 = this.originX + this.offsetX
@@ -358,24 +438,26 @@ export default class Goboard {
 			const border = this.paper.rect(x0, y0, innerWidth, innerWidth)
 			.attr({
 				stroke: lineColor || borderColor,
-				'stroke-width': 2,
+				'stroke-width': lineWidth,
 				fill: kid ? bgColor: 'none'
 			})
 
-			this.drawCache.push(border)
+			if(border){
+				this.drawCache?.push(border)
+			}
 
 			for(let i=1; i< this.options.boardSize - 1; i++ ){
 				const pos = this.getHelperLinePos(i,i);
 				const lineX = this.paper.path(pos[0]).attr({
 					stroke: lineColor || borderColor,
-					'stroke-width': 2
+					'stroke-width': lineWidth
 				});
 				const lineY = this.paper.path(pos[1]).attr({
 					stroke: lineColor || borderColor,
-					'stroke-width': 2
+					'stroke-width': lineWidth
 				});
-				this.drawCache.push(lineX)
-				this.drawCache.push(lineY)
+				this.drawCache?.push(lineX)
+				this.drawCache?.push(lineY)
 			}
 
 			// 星位
@@ -412,14 +494,14 @@ export default class Goboard {
 
 
 	initPieces () {
-		this.dummy = this.paper.circle(0, 0, this.options.PIECE_RADIUS *0.95).attr({
+		this.dummy = this.paper?.circle(0, 0, this.options.PIECE_RADIUS *0.95).attr({
 			fill: 'black',
 			stroke: "none",
 			opacity: this.options.stoneOpacity
 		});
 
 		const path = this.getHeadPath()
-		this.head = this.paper.path(path).attr({fill: "white", stroke: "none"}).hide();
+		this.head = this.paper?.path(path).attr({fill: "white", stroke: "none"}).hide();
 	}
 
 	getHeadPath (){
@@ -451,7 +533,7 @@ export default class Goboard {
 
 		//坐标文本上下左右基线坐标
 		// 坐标到棋盘距离
-		const distance = 13
+		const distance = this.options.coordinateDistance
 		const colYT = this.centerY - (this.options.BOARD_WIDTH / 2) - distance;
 		const colYB = this.centerY + (this.options.BOARD_WIDTH / 2) + distance;
 		const colXL = this.centerX - (this.options.BOARD_WIDTH / 2) - distance;
@@ -459,7 +541,7 @@ export default class Goboard {
 
 		let cfg = {
 			'font-size': this.options.fontSize,
-			'font-weight': 200,
+			'font-weight': 400,
 			'font-family': 'Arial',
 			'fill': this.options.coordinateColor
 		};
@@ -480,11 +562,11 @@ export default class Goboard {
 
 			let y = (i - Math.floor(this.options.boardSize/2)) * this.options.UNIT_LENGTH + this.centerY;
 
-			text = this.createText( colXL, y, this.options.boardSize - i, cfg);
+			text = this.createText( colXL, y, (this.options.boardSize - i).toString(), cfg);
 			this.coordinates['rl'+i] = text;
 			text.node.setAttribute('class', 'coordinate-text left');
 
-			text = this.createText( colXR, y, this.options.boardSize - i, cfg);
+			text = this.createText( colXR, y, (this.options.boardSize - i).toString(), cfg);
 			this.coordinates['rr'+i] = text;
 			text.node.setAttribute('class', 'coordinate-text right');
 		}
@@ -502,11 +584,11 @@ export default class Goboard {
 
 		const color = '#FF6827'
 
-		this.helperLineX = this.paper.path(pos[0]).attr({
+		this.helperLineX = this.paper?.path(pos[0]).attr({
 			stroke: color,
 			'stroke-width': 3
 		}).hide();
-		this.helperLineY = this.paper.path(pos[1]).attr({
+		this.helperLineY = this.paper?.path(pos[1]).attr({
 			stroke: color,
 			'stroke-width': 3
 		}).hide();
@@ -515,30 +597,30 @@ export default class Goboard {
 		const x = this.originX - r
 		const y = this.originY - r
 
-		this.helperLineCircle = this.paper.circle(0, 0, this.options.PIECE_RADIUS).attr({
+		this.helperLineCircle = this.paper?.circle(0, 0, this.options.PIECE_RADIUS).attr({
 			stroke: color,
 			'stroke-width': 4
 		}).hide()
-		this.helperLineDummy = this.paper.image(this.blackImg, x, y, 2*r, 2*r ).hide().attr({
+		this.helperLineDummy = this.paper?.image(this.blackImg, x, y, 2*r, 2*r ).hide().attr({
 			opacity: 0.85
 		})
 		// window.helperLineDummy = this.helperLineDummy
 	}
 
-	updateHelperLines (col, row) {
+	updateHelperLines (col:number, row:number) {
 		this.helperLinePos = [col, row]
 		let pos = this.getHelperLinePos(col, row)
 
 		const x = col * this.options.UNIT_LENGTH + this.originX + this.offsetX;
 		const y = row * this.options.UNIT_LENGTH + this.originY + this.offsetY;
-		this.helperLineCircle.attr({ cx : x , cy: y });
-		this.helperLineDummy.attr({x : x - this.options.PIECE_RADIUS, y: y - this.options.PIECE_RADIUS});
+		this.helperLineCircle?.attr({ cx : x , cy: y });
+		this.helperLineDummy?.attr({x : x - this.options.PIECE_RADIUS, y: y - this.options.PIECE_RADIUS});
 
-		this.helperLineX.attr("path", pos[0])
-		this.helperLineY.attr("path", pos[1])
+		this.helperLineX?.attr("path", pos[0])
+		this.helperLineY?.attr("path", pos[1])
 	}
 
-	getHelperLinePos (col, row) {
+	getHelperLinePos (col:number, row:number) {
 		let x0 = this.originX + this.offsetX
 		let y0 = this.originY + this.offsetY
 		let len = (this.options.boardSize - 1) * this.options.UNIT_LENGTH
@@ -561,7 +643,7 @@ export default class Goboard {
 		return [StrX, StrY]
 	}
 
-	moveHelperLine(x, y) {
+	moveHelperLine(x:number, y:number) {
 		const col = this.helperLinePos[0] + x
 		const row = this.helperLinePos[1] + y
 		const size = this.options.boardSize
@@ -571,8 +653,8 @@ export default class Goboard {
 		}
 	}
 
-	createText (x, y, text, cfg){
-		const node = this.paper.text( x, y, text).attr(cfg);
+	createText (x:number, y:number, text:string, cfg: any){
+		const node = this.paper?.text( x, y, text).attr(cfg);
 
 		if(!this.options.showCoordinates){
 			node.hide();
@@ -580,7 +662,7 @@ export default class Goboard {
 		return node;
 	}
 
-	setCoordinateColor (color) {
+	setCoordinateColor (color:number) {
 		for(let i = 0; i < this.options.boardSize; i++){
 			this.coordinates['c'+i].attr('fill', color);
 			this.coordinates['r'+i].attr('fill', color);
@@ -588,11 +670,11 @@ export default class Goboard {
 	}
 
 	// 获取棋子颜色
-	getStoneColor (color) {
+	getStoneColor (color:number) {
 		return color === 2 ? "white" : "black"
 	}
 
-	setImageByColor(el, color) {
+	setImageByColor(el: RaphaelElement, color:number) {
 		el.attr({
 			src: color === 1 ? this.blackImg: this.whiteImg
 		})
@@ -609,14 +691,14 @@ export default class Goboard {
 		/**
 		 * 落黑子，白子，交替落子切换时，手动改变虚影颜色
 		 */
-	setDummyColor (color){
+	setDummyColor (color:number){
 		let c = this.getStoneColor(color);
 
-		this.dummy.attr({
+		this.dummy?.attr({
 			fill: c
 		});
 
-		if(this.options.showHelperLines) {
+		if(this.options.showHelperLines && this.helperLineDummy) {
 			this.setImageByColor(this.helperLineDummy, color)
 		}
 	}
@@ -627,33 +709,23 @@ export default class Goboard {
 		}
 		this.initialized = true;
 
-		this.intersects = false;
-		this.mouse = {
-			x: 0,
-			y: 0
-		};
-		this.mouse_co = {
-			col: 0,
-			row: 0
-		};
-
 		BoardEvents.forEach(item => {
 			this[item.handler] = this[item.name].bind(this)
-			this.paper.canvas.addEventListener(item.key, this[item.handler])
+			this.paper?.canvas.addEventListener(item.key, this[item.handler])
 		})
 
-		this.paper.canvas.addEventListener('mouseleave', () => {
+		this.paper?.canvas.addEventListener('mouseleave', () => {
 			if(this.dummy && !this.helperShowed) {
 				this.dummy.hide()
 			}
 		})
 
 		if(this.options.resizable){
-			this.resizeHandler = this.onResize.bind(this)
-			window.addEventListener('resize', this.resizeHandler)
+			const resizeHandler = this.onResize.bind(this)
+			window.addEventListener('resize', resizeHandler)
 		}
 
-		this.onPlay((color, col, row) => {
+		this.onPlay((color: number, col: number, row: number) => {
 			if(col>=0 && col< this.options.boardSize && row>=0 && row < this.options.boardSize){
 				this.add(1, col, row, false);
 				this.setCurrentColor(1)
@@ -666,10 +738,12 @@ export default class Goboard {
 			return
 		}
 
-		this.resizeTimer && clearTimeout(this.resizeTimer)
+		this.resizeTimer && window.clearTimeout(this.resizeTimer)
 
-		this.resizeTimer = setTimeout(() => {
+		this.resizeTimer = window.setTimeout(() => {
+			// @ts-ignore
 			this.width = this.el.parentNode.clientWidth * this.options.zoom;
+			// @ts-ignore
 			this.height = this.el.parentNode.clientHeight * this.options.zoom;
 
 			if(this.width > this.height){
@@ -684,7 +758,7 @@ export default class Goboard {
 		}, 200)
 	}
 
-	checkIntersection (e) {
+	checkIntersection (e: any) {
 
 		this.mouse.x = e.offsetX
 		this.mouse.y = e.offsetY
@@ -716,26 +790,26 @@ export default class Goboard {
 
 				switch (this.clickStatus){
 				case 'marker':
-					dummy.attr({x, y});
+					dummy?.attr({x, y});
 					break;
 				default:
-					dummy.attr({cx: x, cy: y});
+					dummy?.attr({cx: x, cy: y});
 				}
 
 				this.intersects = true;
 			}
 
 			if(this.myTurn && STATES.MARK_DEAD !== this.boardStatus){
-				dummy.show();
+				dummy?.show();
 			} else {
-				dummy.hide();
+				dummy?.hide();
 			}
 
 		} else{
 
 			this.intersects = false;
 			if(!this.helperShowed){
-				dummy.hide();
+				dummy?.hide();
 			}
 		}
 	}
@@ -756,22 +830,22 @@ export default class Goboard {
 		this.onMarkDeadCb.call(this, this.mouse_co.col, this.mouse_co.row);
 	}
 
-	onMark (cb) {
+	onMark (cb: any) {
 		this.onMarkCb = cb;
 		return this;
 	}
 
-	onPlay (cb) {
+	onPlay (cb: any) {
 		this.onPlayCb = cb;
 		return this;
 	}
 
-	onMarkDead (cb) {
+	onMarkDead (cb: any) {
 		this.onMarkDeadCb = cb;
 		return this;
 	}
 
-	onUpdateHelperLine (cb) {
+	onUpdateHelperLine (cb: any) {
 		this.onUpdateHelperLineCb = cb;
 		return this;
 	}
@@ -779,7 +853,7 @@ export default class Goboard {
 	/**
 	坐标 to 围棋列行
 	*/
-	ph2go (x, y) {
+	ph2go (x: number, y: number) {
 		const col = x / this.options.UNIT_LENGTH + 9;
 		const row = y / this.options.UNIT_LENGTH + 9;
 
@@ -788,7 +862,7 @@ export default class Goboard {
 	/**
 	围棋列行 to 坐标
 	*/
-	go2ph (col, row) {
+	go2ph (col: number, row: number) {
 		const x = col * this.options.UNIT_LENGTH + this.originX + this.offsetX;
 		const y = row * this.options.UNIT_LENGTH + this.originY + this.offsetY;
 
@@ -796,23 +870,23 @@ export default class Goboard {
 	}
 
 	/*** GO Logics ***/
-	parsePlay (p) {
+	parsePlay (p: string) {
 		return {
 			vertex : p.substring(0,p.lastIndexOf(',')) ,
-			color : 1*p.substring(p.lastIndexOf(',')+1)
+			color : parseInt(p.substring(p.lastIndexOf(',')+1))
 		};
 	}
 
-	parseVertex (vertex) {
+	parseVertex (vertex: string) {
 		let c = vertex.split(',');
-		return {col:c[0]*1 , row:c[1]*1};
+		return {col: parseInt(c[0]) , row:parseInt(c[1])};
 	}
 
-	makeVertex (col , row) {
+	makeVertex (col: number , row: number) {
 		return col+","+row;
 	}
 
-	oppositeColor (color) {
+	oppositeColor (color: number) {
 		if(1 === color){
 			return 2;
 		}
@@ -826,16 +900,16 @@ export default class Goboard {
 	/*
 	* 自动应答题，辅助线
 	* */
-	showHelperLine(col, row) {
+	showHelperLine(col:number, row:number) {
 		if(this.options.readonly){
 			return
 		}
 		if(this.options.showHelperLines){
 			this.updateHelperLines(col, row)
-			this.helperLineX.show()
-			this.helperLineY.show()
-			this.helperLineCircle.show()
-			this.helperLineDummy.show()
+			this.helperLineX?.show()
+			this.helperLineY?.show()
+			this.helperLineCircle?.show()
+			this.helperLineDummy?.show()
 
 			this.helperShowed = true;
 			//将Head标识放于图层最上方
@@ -844,22 +918,22 @@ export default class Goboard {
 	}
 
 	hideHelperLine() {
-		this.helperLineX.hide()
-		this.helperLineY.hide()
-		this.helperLineDummy.hide()
-		this.helperLineCircle.hide()
+		this.helperLineX?.hide()
+		this.helperLineY?.hide()
+		this.helperLineDummy?.hide()
+		this.helperLineCircle?.hide()
 	}
 
-	onMouseDown (e){
+	onMouseDown (e: any){
 		// this.onStartHelperLine(e)
 	}
 
-	onTouchStart (e){
+	onTouchStart (e: any){
 		// this.onStartHelperLine(e)
 	}
 
 
-	onMouseUp (e) {
+	onMouseUp (e: any) {
 		// if(this.helperShowed && this.options.showHelperLines){
 		// 	this.helperLineX.hide()
 		// 	this.helperLineY.hide()
@@ -871,9 +945,9 @@ export default class Goboard {
 		this.onPlayStone(e)
 	}
 
-	onTouchEnd (e) {
+	onTouchEnd (e: any) {
 		e.preventDefault();
-		if(this.options.readonly){
+		if(this.options.readonly || !this.paper){
 			return
 		}
 		// if(this.helperShowed && this.options.showHelperLines){
@@ -885,14 +959,14 @@ export default class Goboard {
 		const touch = e.changedTouches[0]
     const rect = this.paper.canvas.getBoundingClientRect()
 		const scale = this.getScale(this.paper.canvas, 1)
-    touch.offsetX = (touch.clientX - rect.left)/ scale
-    touch.offsetY = (touch.clientY - rect.top)/ scale
+    touch.offsetX = (touch.clientX - rect.left) / scale
+    touch.offsetY = (touch.clientY - rect.top) / scale
 
 		this.onPlayStone(touch)
 	}
 
 	// 手机端，棋盘存在transform缩放
-	getScale(node, current) {
+	getScale(node: any, current: number) :number{
 		
 		if(node && node.style && node.style.transform){
 			let reg = node.style.transform.match(/scale\((\S+)\)/)
@@ -901,18 +975,16 @@ export default class Goboard {
 			}
 		}else if(node.parentNode){
 			return this.getScale(node.parentNode, current)
-		}else {
-			return current
 		}
+		return current
 	}
 
-	onMouseMove (e){
+	onMouseMove (e: any){
 		if(this.options.readonly){
 			return
 		}
 		// 减少触发次数
 		if(!this.moveCounter){
-			this.moveCounter = 0
 			this.checkIntersection(e);
 		}else{
 			this.moveCounter++;
@@ -922,7 +994,7 @@ export default class Goboard {
 		}
 	}
 
-	onTouchMove (e){
+	onTouchMove (e:any){
 		// if(this.options.readonly){
 		// 	return
 		// }
@@ -930,21 +1002,21 @@ export default class Goboard {
 		// this.checkIntersection(touch);
 	}
 
-	setReadonly (b){
+	setReadonly (b: boolean){
 		this.options.readonly = b;
 
 		if(b){
-			this.dummy.hide();
+			this.dummy?.hide();
 		}else{
 			this.helperShowed = false;
 		}
 	}
 
-	onPlayStone (e) {
+	onPlayStone (e: any) {
 		this.checkIntersection(e);
 
 		//@字母、数字标记 drawMarker blablabla
-		if(typeof this.clientColor === 'number' && this.clientColor!== this.currentColor) {
+		if(this.clientColor!== this.currentColor) {
 			return;
 		}
 
@@ -954,17 +1026,17 @@ export default class Goboard {
 	}
 
 
-	setMarkDead (b) {
+	setMarkDead (b: boolean) {
 		if(!b){
 			this.clearTerritoryMarkers();
 		}
 	}
 
-	add (color, col, row, silent) {
+	add (color:number, col:number, row:number, silent: boolean) {
 		let key = col + "," + row;
 
 		//push to history
-		this.trace.push( key + "," + color);
+		this.trace.push( `${key},${color}`);
 
 		if( col > this.options.boardSize || row > this.options.boardSize){
 			return false;
@@ -990,10 +1062,13 @@ export default class Goboard {
 		return true;
 	}
 
-	addPiece (key, col, row, color, order, isRecover) {
+	addPiece (key: string, col:number, row:number, color:number, order?:number, isRecover?: boolean) {
 		let co = this.go2ph(col,row);
+		if(!this.paper){
+			return
+		}
 
-		this.pieces[key] = this.paper.ball({
+		this.pieces[key] = ball(this.paper, {
 			x: co[0],
 			y: co[1],
 			r: this.options.PIECE_RADIUS,
@@ -1015,6 +1090,7 @@ export default class Goboard {
 			return;
 		}
 
+		// @ts-ignore
 		stepText = this.paper.text(co[0], co[1], orderMain).attr({
 			'font-size': this.options.fontSize,
 			'font-family': this.options.fontFamily,
@@ -1052,6 +1128,8 @@ export default class Goboard {
 				return;
 			}
 
+
+			// @ts-ignore
 			stepText = this.paper.text(co[0], co[1], order).attr({
 				'font-size': this.options.fontSize,
 				'font-family': this.options.fontFamily,
@@ -1069,7 +1147,7 @@ export default class Goboard {
 		}
 	}
 
-	removePiece (key) {
+	removePiece (key: string) {
 		if(this.pieces[key]) {
 			this.pieces[key].remove();
 			delete this.pieces[key];
@@ -1087,7 +1165,7 @@ export default class Goboard {
 	}
 
 	//puzzle: add color
-	recoverPiece (col, row, color){
+	recoverPiece (col:number, row:number, color:number){
 		//校验，复原的棋子是否在历史中存在，通过倒序查找获得被吃子的序号
 		let m, key,i;
 
@@ -1107,7 +1185,7 @@ export default class Goboard {
 			this.addPiece(key, col, row, color, -1);
 		} else{
 			let parts = m.split(',');
-			color = parts[2]*1;
+			color = parseInt(parts[2]);
 			key = parts[0]+','+parts[1];
 
 			this.removePiece(key);
@@ -1119,12 +1197,16 @@ export default class Goboard {
 	showHead () {
 		let lastMove = this.getLastMove();
 
+		if(!this.head){
+			return
+		}
+
 		if(lastMove){
 			let goCo = this.parseVertex(lastMove.vertex);
 			let phCo = this.go2ph(goCo.col , goCo.row);
 
 			//将Head标识放于图层最上方
-			this.paper.canvas.appendChild(this.head.node);
+			this.paper?.canvas.appendChild(this.head.node);
 
 			let color = lastMove.color;
 			let headColor, x, y;
@@ -1158,7 +1240,7 @@ export default class Goboard {
 	}
 
 	hideHead (){
-		this.head.hide();
+		this.head?.hide();
 	}
 
 	/**
@@ -1170,7 +1252,7 @@ export default class Goboard {
 	history : ['0,3,0','13,3,1']
 	stones :  exists stones ,{"col,row":color}, eg. {"9,3":0,"9,9":0,"15,9":0}
 	*/
-	load ( history, stones) {
+	load ( history: any, stones: any) {
 		if(!history ){
 			return;
 		}
@@ -1180,30 +1262,6 @@ export default class Goboard {
 		this.rebuildPieces(stones);
 
 		this.setCurrentColor();
-	}
-
-	// iqidao 1.0
-	loadFromGo (history , stones) {
-		let h = [];
-		let i
-		for(i =0 ;i < history.length ;i++) {
-			h.push(history[i].col+","+history[i].row+","+history[i].color+","+(history[i].isAdded?1:0));
-		}
-		let s = {};
-		let cols = stones.split(',');
-		for(i = 0 ;i < cols.length;i++) {
-			for(let j=0 ;j<cols[i].length;j++){
-				if(0 === cols[i][j]*1) {
-					continue;
-				}
-				s[i+","+j] = cols[i][j]*1;
-			}
-		}
-
-		this.history = history;
-		this.stones = s;
-
-		this.load(h , s);
 	}
 
 	showOrder () {
@@ -1315,13 +1373,13 @@ export default class Goboard {
 		this.hideHead();
 	}
 
-	rebuildPieces (stones){
+	rebuildPieces (stones: any){
 		this.addedStoneNum = 0;
 
 		for(let i = 0 ; i < this.trace.length; i++){
 			const goCo = this.trace[i].split(",");
 			//pass
-			if(-1 === goCo[0] || -1 === goCo[1]){
+			if('-1' === goCo[0] || '-1' === goCo[1]){
 				continue;
 			}
 			let key = goCo[0]+","+goCo[1];
@@ -1332,14 +1390,14 @@ export default class Goboard {
 				continue;
 			}
 
-			let color = goCo[2];
-			let isAdded = goCo[3]*1;
+			let color = parseInt(goCo[2]);
+			let isAdded = goCo[3];
 
 			if(isAdded){
-				this.addPiece(key, goCo[0],goCo[1], color, -1);
+				this.addPiece(key, parseInt(goCo[0]), parseInt(goCo[1]), color, -1);
 				this.addedStoneNum++;
 			}else{
-				this.addPiece(key, goCo[0],goCo[1], color, i + 1 - this.addedStoneNum);
+				this.addPiece(key, parseInt(goCo[0]), parseInt(goCo[1]), color, i + 1 - this.addedStoneNum);
 			}
 		}
 
@@ -1347,11 +1405,11 @@ export default class Goboard {
 		this.showHead();
 	}
 
-	getPiece (col, row) {
+	getPiece (col: number, row: number) {
 		return this.pieces[col+','+row];
 	}
 
-	getStepPiece (step) {
+	getStepPiece (step: number) {
 		if(step>=this.trace.length){
 			return null;
 		}
@@ -1362,7 +1420,7 @@ export default class Goboard {
 		return this.pieces[s.substring(0, s.lastIndexOf(','))];
 	}
 
-	goTo (n){
+	goTo (n: number){
 		if(n>this.trace.length){
 			return;
 		}
@@ -1385,16 +1443,12 @@ export default class Goboard {
 		}
 	}
 
-	setPlayable (b) {
-		this.playable = b;
-	}
-
-	setClientColor (val) {
+	setClientColor (val: number) {
 		this.clientColor = val;
 		this.updateDummyColor();
 	}
 
-	setCurrentColor (val) {
+	setCurrentColor (val?: number) {
 		if(val){
 			this.currentColor = val;
 		}else if(this.trace.length){
@@ -1421,7 +1475,7 @@ export default class Goboard {
 	/**
 	 * @param vertexes [{col:1,row:2}]
 	 */
-	eat (vertexes) {
+	eat (vertexes: any) {
 		for(let i = 0 ;i < vertexes.length;i++){
 			if(!this.getPiece(vertexes[i].col, vertexes[i].row)){
 				continue;
@@ -1443,7 +1497,7 @@ export default class Goboard {
 		this.places = {};
 	}
 
-	markTerritories (territories) {
+	markTerritories (territories: any) {
 		for(let i = 0 ;i < territories.length; i++) {
 			this.drawPlaces(territories[i].Color ,territories[i].Moyos);
 		}
@@ -1454,7 +1508,7 @@ export default class Goboard {
 	// 	this.boardStatus = STATES.MARK_DEAD;
 	// 	this.setMarkDead(true);
 	// }
-	startMarkDead (territories) {
+	startMarkDead (territories: any) {
 		this.boardStatus = STATES.MARK_DEAD;
 		this.setMarkDead(true);
 		this.markTerritories(territories)
@@ -1476,14 +1530,14 @@ export default class Goboard {
 		}
 	}
 
-	drawPlaces (color, vertexes){
+	drawPlaces (color: number, vertexes: any){
 		for(let i = 0 ;i<vertexes.length ;i++) {
 			let key = vertexes[i].Col + "," + vertexes[i].Row;
 			this.addPlace(key, vertexes[i].Col, vertexes[i].Row, color);
 		}
 	}
 
-	addPlace (key, col, row, color) {
+	addPlace (key:string, col: number, row: number, color: number) {
 		const co = this.go2ph(col,row);
 
 		let fill;
@@ -1498,7 +1552,7 @@ export default class Goboard {
 
 		const offset = this.options.PLACE_WIDTH/ 2;
 
-		this.places[key] = this.paper.rect(co[0] - offset, co[1] - offset, this.options.PLACE_WIDTH, this.options.PLACE_WIDTH).attr({
+		this.places[key] = this.paper?.rect(co[0] - offset, co[1] - offset, this.options.PLACE_WIDTH, this.options.PLACE_WIDTH).attr({
 			fill: fill,
 			opacity: 0.7
 		});
@@ -1516,7 +1570,7 @@ export default class Goboard {
 		this.trace = [];
 	}
 
-	remove (vertexes) {
+	remove (vertexes:any) {
 
 		this.hideHead();
 		this.eat(vertexes);
@@ -1531,8 +1585,8 @@ export default class Goboard {
 	}
 
 	endDrawMarker () {
-		this.clickStatus = null;
-		this.currentMarker = null;
+		this.clickStatus = ''
+		this.currentMarker = ''
 		this.endMarkerDummy();
 	}
 
@@ -1542,7 +1596,7 @@ export default class Goboard {
 		}
 		this.markers = {};
 
-		this.currentMarker = null;
+		this.currentMarker = '';
 		this.getNextMarker();
 		this.updateMarkerDummy(this.currentMarker);
 	}
@@ -1582,16 +1636,16 @@ export default class Goboard {
 		return list
 	}
 
-	startMarkerDummy (text) {
+	startMarkerDummy (text?: string) {
 		if(!text){
 			this.getNextMarker();
 		}
 
-		this.dummy.hide();
+		this.dummy?.hide();
 		this.updateMarkerDummy(text || this.currentMarker);
 	}
 
-	updateMarkerDummy (marker){
+	updateMarkerDummy (marker: string){
 		if(this.markerDummy){
 			this.markerDummy.remove();
 		}
@@ -1600,6 +1654,7 @@ export default class Goboard {
 			return;
 		}
 
+		// @ts-ignore
 		this.markerDummy = this.paper.text(0, 0, marker).attr({
 			'font-size': this.options.markerSize,
 			'font-weight': 'bold',
@@ -1621,12 +1676,11 @@ export default class Goboard {
 		this.markerDummy && this.markerDummy.hide();
 	}
 
-
-	drawMarker (mark, col, row) {
+	drawMarker (mark: string, col: number, row: number) {
 		let key = col + "," + row;
 
 		if( col > this.options.boardSize || row > this.options.boardSize){
-			return false;
+			return;
 		}
 
 		//该位置已存在标记， 先删除
@@ -1641,14 +1695,14 @@ export default class Goboard {
 		// 	'text-shadow': '0 0 9px #fff, 0 0 9px #fff'
 		// });
 
-		this.markers[key] = this.paper.text(co[0], co[1], mark).attr({
+		this.markers[key] = this.paper?.text(co[0], co[1], mark).attr({
 			'font-size': this.options.markerSize,
 			"font-weight": "bold",
 			fill: markerColor
 		});
 	}
 
-	removeMarker (col, row) {
+	removeMarker (col: number, row: number) {
 		let key = col + "," + row;
 
 		if(this.markers[key]) {
@@ -1672,7 +1726,7 @@ export default class Goboard {
 	// 	this.boardMesh.attr('src', setting[this.options.boardSize].boardImg)
 	// }
 
-	changeTheme(settings) {
+	changeTheme(settings : any) {
 		// 坐标校准
 		Object.assign(this.options, settings)
 		const size = this.options.boardSize;
@@ -1683,8 +1737,8 @@ export default class Goboard {
 		this.initChessBoard()
 
 		// head三角和虚拟棋子尺寸变化，需要重新生成
-		this.dummy.remove();
-		this.head.remove();
+		this.dummy?.remove();
+		this.head?.remove();
 
 		this.initPieces()
 	}
