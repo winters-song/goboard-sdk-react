@@ -1,7 +1,6 @@
 
 import GoboardPlayer from "./GoboardPlayer";
 import Audio from "../Audio/Audio";
-import {Color} from "./Go";
 
 /*
 *
@@ -14,7 +13,7 @@ import {Color} from "./Go";
 export default class GoboardGamePlayer extends GoboardPlayer{
 
   // 不同于打谱工具，这里不改变clientColor
-  move (node, silent) {
+  move (node:any, silent: boolean) {
     const eaten = this.go.play(node.col, node.row, node.color);
 
     if (null !== eaten) {
@@ -28,12 +27,12 @@ export default class GoboardGamePlayer extends GoboardPlayer{
       }
 
       if (eaten.size) {
-        const captures = [];
-        eaten.forEach(function (vertex) {
+        const captures: any = [];
+        eaten.forEach(function (vertex: string) {
           const arr = vertex.split(',');
           const item = {
-            col: arr[0] * 1,
-            row: arr[1] * 1
+            col: parseInt(arr[0]),
+            row: parseInt(arr[1])
           };
           captures.push(item);
         });
@@ -48,11 +47,11 @@ export default class GoboardGamePlayer extends GoboardPlayer{
           }
         }
 
-        if(node.color === Color.BLACK){
-          this.blackCaptures += eaten.size
-        }else{
-          this.whiteCaptures += eaten.size
-        }
+        // if(node.color === Color.BLACK){
+        //   this.blackCaptures += eaten.size
+        // }else{
+        //   this.whiteCaptures += eaten.size
+        // }
       }
     }
 
@@ -60,7 +59,7 @@ export default class GoboardGamePlayer extends GoboardPlayer{
   }
 
 	initEvents () {
-		this.cb.onPlay((color, col, row) => {
+		this.cb.onPlay((color: number, col: number, row: number) => {
 
       // 确认落子，第二次落在相同位置，视为确认
       if(this.cb.options.playConfirm && this.cb.clientColor === color){
@@ -77,7 +76,7 @@ export default class GoboardGamePlayer extends GoboardPlayer{
       
       this.emit('play', {color, col, row})
 		});
-    this.cb.onMarkDead((col, row) => {
+    this.cb.onMarkDead((col: number, row: number) => {
       this.emit('markdead', {col, row})
     })
 	}
