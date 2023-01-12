@@ -504,7 +504,7 @@ export default class GoboardPlayer extends EventEmitter{
 			//添加多子 或 标记
 			else if (node instanceof SgfNode) {
 				//循环节点属性
-				node.properties.forEach ((prop:any) => {
+				node.properties?.forEach ((prop:any) => {
 
 					switch (prop.name) {
 						case "AB":
@@ -538,7 +538,7 @@ export default class GoboardPlayer extends EventEmitter{
 		return this.stones;
 	}
 
-	addMoveStone(col:number, row:number, color:number) {
+	addMoveStone(col:number|undefined, row:number|undefined, color?:number) {
 		this.stones.push({
 			col: col,
 			row: row,
@@ -663,12 +663,10 @@ export default class GoboardPlayer extends EventEmitter{
 			return
 		}
 		// 根据SGF,自动切换当前棋盘大小
-		// @ts-ignore
-		let boardSize = sgfTree.root.getProperty('SZ');
-		if (boardSize && boardSize.length) {
-			boardSize = boardSize[0]*1;
-		} else {
-			boardSize = 19
+		let boardSize = 19
+		let sizeProp = sgfTree.root.getProperty('SZ');
+		if (sizeProp && sizeProp.length) {
+			boardSize = sizeProp[0]*1;
 		}
 
 		// 保留之前棋盘状态（手数、坐标）
@@ -703,7 +701,7 @@ export default class GoboardPlayer extends EventEmitter{
 			const step = this.cb.trace[i].split(',');
 			const color = step[2]*1
 	
-			if(color !== SgfTree.COLOR_BLACK && color !== SgfTree.COLOR_WHITE){
+			if(color !== Color.BLACK && color !== Color.WHITE){
 				continue;
 			}
 			traceSgf+= ';'+SgfTree.fromInt(color)+'['+SgfTree.toGnuCo(step[0]*1, step[1]*1)+']';
