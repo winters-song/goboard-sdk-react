@@ -5,25 +5,18 @@
  */
 
 // Set 补充:批量添加，批量删除
-Set.prototype.addAll = function (another) {
-  if(another.size){
-    another.forEach(item => {
-      this.add(item);
-    });
-  }else if (another.length){
-    for (const i in another){
-      this.add(another[i]);
-    }
-  }
-
-  return this;
+export const mergeSet = <T>(_this: Set<T>, another: Set<T>|Array<T>) => {
+  another.forEach((item) => {
+    _this.add(item);
+  });
+  return _this;
 }
 
-Set.prototype.removeAll = function (another){
-  another.forEach(item => {
-    this.delete(item);
+export const removeSet = <T>(_this: Set<T>, another: Set<T>) => {
+  another.forEach((item:any) => {
+    _this.delete(item);
   });
-  return this;
+  return _this;
 }
 
 // 颜色
@@ -34,46 +27,42 @@ export const Color = {
 }
 
 // 大龙
-export const Str = function(vertex){
-  //棋子
-  this.vertexes = new Set();
-  //气
-  this.liberty = new Set();
-  //撞气的对方棋子
-  this.opposite = new Set();
+export class Str {
 
-  if(vertex){
-    this.vertexes.add(vertex);
-  }
-};
-Str.prototype = {
-  merge: function(another){
-    this.vertexes.addAll(another.vertexes);
-    this.liberty.addAll(another.liberty);
-    this.opposite.addAll(another.opposite);
+  //棋子
+  vertexes = new Set<string>()
+  //气
+  liberty = new Set<string>()
+  //撞气的对方棋子
+  opposite = new Set<string>()
+
+  merge (another: Str){
+    mergeSet(this.vertexes, another.vertexes);
+    mergeSet(this.liberty, another.liberty);
+    mergeSet(this.opposite, another.opposite);
 
     return this;
   }
 };
 
+
 const neighbors = [[0,1],[0,-1],[1,0],[-1,0]]
 const surround = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]
 
-//noBoard: 不进行board二维数组初始化(UCT使用)
 export class Go {
 
-  constructor(size, noBoard){
+  size = 19;
+  blackStrs = new Set<Str>();
+  whiteStrs = new Set<Str>();
+  blackCaptures = new Map<number, Set<Str>>();
+  whiteCaptures = new Map<number, Set<Str>>();
+  addedStones: any[] = []
+  history: any[] = []
+  board : number[][] = []
+
+  constructor(size: number){
     // 9，13，19
     this.size = size;
-    this.blackStrs = new Set();
-    this.whiteStrs = new Set();
-    this.blackCaptures = new Map();
-    this.whiteCaptures = new Map();
-    this.addedStones = []
-
-    if(noBoard){
-      return
-    }
     this.init()
   }
 
@@ -82,7 +71,7 @@ export class Go {
     this.board = [...Array(this.size)].map(() => Array(this.size).fill(Color.EMPTY))
   }
 
-  add (x, y, color, isAdd) {
+  add (x: number, y: number, color: number, isAdd?: boolean) {
     let move = [x, y, color]
     let eating = this.willEat(move)
     let eatenVertexes = new Set()
@@ -90,8 +79,8 @@ export class Go {
       this.addedStones.push(move)
     }
 
-    eating.forEach(str => {
-      eatenVertexes.addAll(str.vertexes)
+    eating.forEach((str: Str) => {
+      mergeSet(eatenVertexes, str.vertexes)
     })
 
     this.doPlay(move, eating)
@@ -102,26 +91,26 @@ export class Go {
     return eatenVertexes
   }
 
-  getVertex (x, y) {
+  getVertex (x: number, y: number) {
     return `${x},${y}`
   }
 
-  isOnBoard (x, y){
+  isOnBoard (x: number, y: number){
     return x >=0 && x < this.size && y >=0 && y < this.size
   }
 
   // 该坐标是否有落子, col=x, row=y
-  isEmpty (x, y) {
+  isEmpty (x: number, y: number) {
     return this.board[y][x]  ===  Color.EMPTY
   }
 
-  isBadMove (x, y) {
+  isBadMove (x: number, y: number) {
     return y < 0 || x < 0 || y >= this.size || x >= this.size || this.board[y][x] !== Color.EMPTY
   }
 
   // 此处可以落子
   // 此处无棋子，不是打劫，不是禁入点
-  canPlay (x, y, color) {
+  canPlay (x: number, y: number, color: number) {
     let move = [x, y, color]
 
     // 是否已经有子
@@ -132,8 +121,8 @@ export class Go {
     let eating = this.willEat(move)
     let eatenVertexes = new Set()
     // 把被吃掉的各块棋的棋子坐标全部加入集合
-    eating.forEach(str => {
-      eatenVertexes.addAll(str.vertexes)
+    eating.forEach((str: Str) => {
+      mergeSet(eatenVertexes, str.vertexes)
     })
     // 是否是打劫
     if(!this.checkCanKo(move, eating)){
@@ -150,14 +139,14 @@ export class Go {
     return this.history.length
   }
 
-  // 是否是打劫
-  checkCanKo (move, eating) {
+  // 是否是打劫: true:可以提子， false:打劫，不能提子
+  checkCanKo (move: number[], eating: Set<Str>) {
     if (1 !== eating.size) {
       return true
     }
     let eatVertex = null
 
-    eating.forEach( str => {
+    for(let str of eating){
       // 吃掉多个子则不是打劫
       if(str.vertexes.size !== 1) {
         return true
@@ -165,7 +154,7 @@ export class Go {
       str.vertexes.forEach(v => {
         eatVertex = v
       })
-    })
+    }
 
     // 没有上一步，不是打劫
     let lastMove = this.getLastMove()
@@ -186,15 +175,15 @@ export class Go {
       return true
     }
 
-    lastCaptures.forEach(str => {
+    for(let str of lastCaptures){
       // 吃掉多个子则不是打劫
       if(str.vertexes.size !== 1) {
         return true
       }
-      str.vertexes.forEach(function (v) {
+      str.vertexes.forEach(v => {
         lastCaptureVertex = v
       })
-    })
+    }
 
     // 上一步被提掉子=本次落子，本次要吃掉的子=上一步落子
     if(lastCaptureVertex  ===  this.getVertex(move[0], move[1]) && eatVertex  ===  this.getVertex(lastMove[0], lastMove[1])){
@@ -204,7 +193,7 @@ export class Go {
   }
 
   // 禁入点
-  willSuicide (move) {
+  willSuicide (move: number[]) {
     let strs = move[2]  ===  Color.BLACK ? this.blackStrs : this.whiteStrs;
     let vertex = this.getVertex(move[0], move[1])
     // 该落子是否有气
@@ -213,21 +202,20 @@ export class Go {
     if (hasLiberty) {
       return false;
     }
-    let result = true;
-    strs.forEach(str => {
-      // 所有大龙有该气，并有多口气就忽略
+
+    for(let str of strs){
+      // 有该气的大龙有多口气
       if (str.liberty.has(vertex) && str.liberty.size > 1) {
-        result = false;
         return false;
       }
-    });
+    }
 
-    return result;
+    return true;
   }
 
-  willEat (move) {
+  willEat (move: number[]) {
     // 将被吃掉的多块棋
-    let eatenStrs = new Set();
+    let eatenStrs = new Set<Str>();
     // 当前落黑子，则遍历白棋各块棋， 反之亦然
     let strs = move[2]  ===  Color.BLACK ? this.whiteStrs : this.blackStrs;
     //搜索对方每条龙是否是最后1口气
@@ -241,11 +229,11 @@ export class Go {
     return eatenStrs;
   }
 
-  oppositeColor(color){
+  oppositeColor(color: number){
     return 3 - color
   }
 
-  doPlay (move, eating) {
+  doPlay (move: number[], eating: Set<Str>) {
     let vertex = this.getVertex(move[0], move[1])
     // eat
     let myStrs = move[2]  ===  Color.BLACK ? this.blackStrs : this.whiteStrs;
@@ -255,8 +243,8 @@ export class Go {
     eating.forEach( eatenStr => {
       eatenStr.vertexes.forEach(v => {
         // 清除board值
-        const arr = v.split(',');
-        this.board[arr[1]*1][arr[0]*1] = Color.EMPTY;
+        const arr = v.split(',').map(i => parseInt(i));
+        this.board[arr[1]][arr[0]] = Color.EMPTY;
 
         myStrs.forEach(str => {
           // 对于所有撞气的位置，增加气，移除撞气
@@ -277,24 +265,24 @@ export class Go {
         this.whiteCaptures.set(this.history.length, eating);
       }
       // 对方大龙移除掉被吃的
-      oppositeStrs.removeAll(eating);
+      removeSet(oppositeStrs, eating);
     }
 
     // 合并我方大龙
     // 合并主方
-    let firstStrs = null;
+    let firstStr: Str|undefined;
     // 合并客方
-    let mergedStrs = new Set();
+    let mergedStrs = new Set<Str>();
 
     myStrs.forEach(str => {
       // 我方气有该位置
       if (str.liberty.has(vertex)) {
-        if (null  ===  firstStrs) {
+        if (!firstStr) {
           // 记录要合并主方
-          firstStrs = str;
+          firstStr = str;
         } else {
           // 找到合并客方，合并
-          firstStrs.merge(str);
+          firstStr.merge(str);
           mergedStrs.add(str);
         }
       }
@@ -302,23 +290,23 @@ export class Go {
 
     // 如果有合并动作，将合并客方删掉
     if (mergedStrs.size){
-      myStrs.removeAll(mergedStrs);
+      removeSet(myStrs, mergedStrs)
     }
 
     // 没有大龙相连，新建一块棋
-    if (null  ===  firstStrs) {
-      firstStrs = new Str();
-      firstStrs.vertexes.add(vertex);
-      myStrs.add(firstStrs);
+    if (!firstStr) {
+      firstStr = new Str();
+      firstStr.vertexes.add(vertex);
+      myStrs.add(firstStr);
     } else {
       // 延长大龙，减少当前位置的气
-      firstStrs.vertexes.add(vertex);
-      firstStrs.liberty.delete(vertex);
+      firstStr.vertexes.add(vertex);
+      firstStr.liberty.delete(vertex);
     }
     // 获得该点的气，加到大龙上
-    firstStrs.liberty.addAll(this.getLiberty(vertex));
+    mergeSet(firstStr.liberty, this.getLiberty(vertex));
     // 获得该点的撞气，加到大龙上
-    firstStrs.opposite.addAll(this.getOpposite(move));
+    mergeSet(firstStr.opposite, this.getOpposite(move));
     // 对方大龙相应减气，增加撞气
     oppositeStrs.forEach(str => {
       if (str.liberty.has(vertex)) {
@@ -328,8 +316,11 @@ export class Go {
     });
   }
 
-  undo(n) {
-    let moveResult = {};
+  undo(n: number) {
+    let moveResult = {
+      move: [],
+      eated: <any>null
+    };
 
     if(n > this.history.length){
       return null;
@@ -383,7 +374,7 @@ export class Go {
     * @return []Vertex  返回被吃掉的子
     * @return null  不能落子（有效性校验、打劫或是禁入点）
     */
-  play (x, y, color) {
+  play (x: number, y: number, color: number) {
     // 检查有效性
     // 此处有子，不能落子
     if (!this.isOnBoard(x, y) || !this.isEmpty(x, y)) {
@@ -394,11 +385,11 @@ export class Go {
 
     // 是否有提子
     let eating = this.willEat(move);
-    let eatenVertexes = new Set();
+    let eatenVertexes = new Set<string>();
 
     // 把被吃掉的各块棋的棋子坐标全部加入集合
     eating.forEach(str => {
-      eatenVertexes.addAll(str.vertexes);
+      mergeSet(eatenVertexes, str.vertexes)
     });
 
     // 是否是打劫
@@ -423,7 +414,7 @@ export class Go {
   /**
    *	快速走子
     */
-  forcePlay(x, y, color) {
+  forcePlay(x: number, y: number, color: number) {
     let move = [x, y, color];
     // 是否有提子
     let eating = this.willEat(move);
@@ -439,7 +430,7 @@ export class Go {
     return this.history[this.history.length - 1];
   }
 
-  getNeighborByColor(x, y, color){
+  getNeighborByColor(x: number, y: number, color: number){
     const arr = []
     for (let i in neighbors){
       let x2 = neighbors[i][0] + x
@@ -453,22 +444,22 @@ export class Go {
   }
 
   // 返回该位置上下左右没有棋子的顶点
-  getLiberty(vertex) {
+  getLiberty(vertex: string) {
     const arr = vertex.split(',')
-    return this.getNeighborByColor(arr[0]*1, arr[1]*1, Color.EMPTY)
+    return this.getNeighborByColor(parseInt(arr[0]), parseInt(arr[1]), Color.EMPTY)
   }
 
-  getOpposite(move) {
+  getOpposite(move: number[]) {
     return this.getNeighborByColor(move[0], move[1], this.oppositeColor(move[2]))
   }
 
   // 获取某位置上下左右我方棋子
-  getOurs (move) {
+  getOurs (move: number[]) {
     return this.getNeighborByColor(move[0], move[1], move[2]);
   }
 
   // 获取某位置周围8个位置的某种状态数（我方、敌方、空）
-  getArounds (move) {
+  getArounds (move: number[]) {
     let arr = [];
     let color = move[2];
 
@@ -484,7 +475,7 @@ export class Go {
   }
 
   // 获取与大龙相邻的敌方大龙
-  getOppositeStrs (myStr, oppositeStrs) {
+  getOppositeStrs (myStr: Str, oppositeStrs: Set<Str>) {
     let result = new Set();
 
     oppositeStrs.forEach(str => {
@@ -500,7 +491,7 @@ export class Go {
   }
 
   // startSgf: 带有AB,AW的sgf, 需要拼接
-  getSgf (startSgf) {
+  getSgf (startSgf?: string) {
     let prefix, history
     if(startSgf){
       const key = "MULTIGOGM[1]"
@@ -517,7 +508,7 @@ export class Go {
     }
     let s = '';
 
-    function toGnuCo(x, y) {
+    function toGnuCo(x: number, y: number) {
       return String.fromCharCode(97 + x) + String.fromCharCode(97 + y);
     }
 
@@ -536,16 +527,17 @@ export class Go {
     return prefix + s + ')';
   }
 
-  getCaptureSize(color) {
+  getCaptureSize (color: number) {
     if(color ===Color.BLACK){
       return this._getCaptureSize(this.blackCaptures)
     }
     if(color ===Color.WHITE){
       return this._getCaptureSize(this.whiteCaptures)
     }
+    return 0
   }
   // 获取吃子数量
-  _getCaptureSize (map) {
+  _getCaptureSize (map: Map<number, Set<Str>>) {
     var i = 0;
     map.forEach(function (strs) {
       strs.forEach(function (str) {

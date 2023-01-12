@@ -24,6 +24,7 @@
   },
   "include": [
     "src",
+    "global.d.ts",
     "images.d.ts",
   ]
 }
