@@ -2,7 +2,8 @@ import {ClassroomSitTeacher} from "../application";
 import React, {useRef, useState} from "react";
 import './classroom.less'
 
-const testSgf = '(;CA[utf-8]AB[cf][eg][ee]AW[ef][de][dd]AP[MultiGo:4.4.4]SZ[9]AB[df]MULTIGOGM[1];W[ff];B[fe];W[gf];B[hf];W[ge];B[fd];W[gd];B[fc];W[ec];B[gc];W[dc];B[hd];W[gg];B[eb];W[ed];B[db];W[fb];B[cc];W[cd];B[bd];W[be];B[ce])'
+// const testSgf = '(;CA[utf-8]AB[cf][eg][ee]AW[ef][de][dd]AP[MultiGo:4.4.4]SZ[9]AB[df]MULTIGOGM[1];W[ff];B[fe];W[gf];B[hf];W[ge];B[fd];W[gd];B[fc];W[ec];B[gc];W[dc];B[hd];W[gg];B[eb];W[ed];B[db];W[fb];B[cc];W[cd];B[bd];W[be];B[ce])'
+const testSgf = '(;GM[1]FF[4]CA[UTF-8]AP[Sabaki:0.51.1]KM[7.5]SZ[13]DT[2023-01-16]AB[gg][hh]AW[hg][gh];B[ih];W[hf];B[fg];W[gi];B[];W[ij];B[ji];W[hj];B[jh];W[jf];B[if];W[ie];B[jg];W[ig];B[gj];W[fj];B[kf];W[gk];B[je];W[jj];B[if];W[jd];B[eh];W[jf];B[ej];W[ek];B[if])'
 const activeStyle ={
   backgroundColor: '#f80',
   color: 'white'

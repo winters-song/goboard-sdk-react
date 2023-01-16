@@ -47,7 +47,7 @@ export default class GoboardPlayer extends EventEmitter{
 
 	el?: HTMLDivElement
 
-	cb: any
+	cb?: Goboard
 	go: any
 	sgfTree: any
 	root:any
@@ -98,6 +98,9 @@ export default class GoboardPlayer extends EventEmitter{
 	}
 
 	setWhoFirst () {
+		if(!this.cb){
+			return
+		}
 		this.cb.setClientColor(this.whoFirst);
 		this.cb.setCurrentColor(this.whoFirst);
 		this.cb.whoFirst = this.whoFirst;
@@ -106,6 +109,10 @@ export default class GoboardPlayer extends EventEmitter{
 	}
 
 	initEvents () {
+		if(!this.cb){
+			return
+		}
+
 		this.cb.onPlay((color:number, col:number, row:number) => {
 			//创建节点
 			const node = new SgfMoveNode(col, row, color);
@@ -113,7 +120,7 @@ export default class GoboardPlayer extends EventEmitter{
 			node.parent = this.currentNode;
 
 			// 确认落子
-			if(this.cb.options.playConfirm && this.cb.currentColor === this.whoFirst){
+			if(this.cb?.options.playConfirm && this.cb?.currentColor === this.whoFirst){
 				this.cb.showHelperLine(col, row)
 				this.prePlayData = {node, col, row, color};
 				return
@@ -182,12 +189,11 @@ export default class GoboardPlayer extends EventEmitter{
 
 		const {node, col, row, color} = this.prePlayData
 		if (!this.go.canPlay(col, row, color)) {
-			// @ts-ignore
 			Audio.play('playForbidden')
 			return;
 		}
 		// 真正落子后，隐藏候选落子
-		this.cb.hideHelperLine()
+		this.cb?.hideHelperLine()
 		this.currentNode.children = [node];
 		this.currentNode = node;
 		this.currentStep += 1;
@@ -197,7 +203,10 @@ export default class GoboardPlayer extends EventEmitter{
 		this.prePlayData = null;
 	}
 
-	move (node:any, silent?:boolean) {
+	move (node:any, silent:boolean = false) {
+		if(!this.cb){
+			return
+		}
 		const eaten = this.go.play(node.col, node.row, node.color);
 
 		if (null !== eaten) {
@@ -264,7 +273,7 @@ export default class GoboardPlayer extends EventEmitter{
 
 	toStart () {
 		this.fastBackward(this.currentStep);
-		this.cb.setCurrentColor();
+		this.cb?.setCurrentColor();
 		this.currentStep = 0;
 	}
 
@@ -278,7 +287,7 @@ export default class GoboardPlayer extends EventEmitter{
 
 		this.fastForward(step);
 
-		this.cb.showHead();
+		this.cb?.showHead();
 	}
 
 	onMove () {
@@ -362,7 +371,7 @@ export default class GoboardPlayer extends EventEmitter{
 	}
 
 	backward (silent?: boolean) {
-		if (this.currentStep <= 0) {
+		if (!this.cb || this.currentStep <= 0) {
 			return false;
 		}
 
@@ -377,7 +386,7 @@ export default class GoboardPlayer extends EventEmitter{
 
 		if (moveResult && moveResult.eated && moveResult.eated.size) {
 			moveResult.eated.forEach((move:any) => {
-				this.cb.recoverPiece(move.col, move.row, move.color);
+				this.cb?.recoverPiece(move.col, move.row, move.color);
 			});
 		}
 
@@ -417,7 +426,7 @@ export default class GoboardPlayer extends EventEmitter{
 			}
 		}
 
-		this.cb.showHead();
+		this.cb?.showHead();
 		this.onMove();
 		return counter;
 	}
@@ -433,7 +442,7 @@ export default class GoboardPlayer extends EventEmitter{
 			}
 		}
 
-		this.cb.showHead();
+		this.cb?.showHead();
 		this.onMove();
 		return counter;
 	}
@@ -446,7 +455,7 @@ export default class GoboardPlayer extends EventEmitter{
 			let key = i.col + "," + i.row;
 
 			if (!i.mark && !i.move) {
-				this.cb.addPiece(key, i.col, i.row, i.color, -1);
+				this.cb?.addPiece(key, i.col, i.row, i.color, -1);
 				this.go.add(i.col, i.row, i.color);
 			}
 		});
@@ -454,7 +463,7 @@ export default class GoboardPlayer extends EventEmitter{
 		//后渲染字母，保证不被棋子盖住
 		stones.forEach( (i:any) => {
 			if (i.mark) {
-				this.cb.drawMarker(i.mark, i.col, i.row);
+				this.cb?.drawMarker(i.mark, i.col, i.row);
 			}
 		});
 
@@ -473,7 +482,7 @@ export default class GoboardPlayer extends EventEmitter{
 		if (cfg._traceAnswer) {
 			cfg._traceAnswer.forEach((move:any) => {
 				let val = move.split(',');
-				this.cb.onPlayCb.call(this.cb, val[2] * 1, val[0] * 1, val[1] * 1);
+				this.cb?.onPlayCb.call(this.cb, val[2] * 1, val[0] * 1, val[1] * 1);
 			});
 
 			return !!cfg._traceAnswer.length;
@@ -484,7 +493,7 @@ export default class GoboardPlayer extends EventEmitter{
 			const stones = this.getTreeStones(tree);
 
 			stones.forEach((move:any) => {
-				this.cb.onPlayCb.call(this.cb, move.color, move.col, move.row);
+				this.cb?.onPlayCb.call(this.cb, move.color, move.col, move.row);
 			});
 
 			return !!stones.length;
@@ -637,9 +646,9 @@ export default class GoboardPlayer extends EventEmitter{
 		this.currentNode = this.root;
 
 		this.go = new Go(this.boardSize);
-		this.cb.clearBoard();
-		this.cb.clearMarkers();
-		this.cb.setClientColor(Color.BLACK);
+		this.cb?.clearBoard();
+		this.cb?.clearMarkers();
+		this.cb?.setClientColor(Color.BLACK);
 
 		this.setWhoFirst();
 
@@ -691,6 +700,9 @@ export default class GoboardPlayer extends EventEmitter{
 	// 分屏课堂，教师发标记题，获取当前sgf
 	// 标记放在最后一个节点上面（标记放root上后台生成图片不对）
 	getSgfString() {
+		if(!this.cb){
+			return
+		}
 		if(!this.sgfTree){
 			console.warn('no sgftree')
 			return ''
@@ -699,12 +711,12 @@ export default class GoboardPlayer extends EventEmitter{
 
 		for(let i = 0 ;i < this.cb.trace.length;i++) {
 			const step = this.cb.trace[i].split(',');
-			const color = step[2]*1
+			const color = parseInt(step[2])
 	
 			if(color !== Color.BLACK && color !== Color.WHITE){
 				continue;
 			}
-			traceSgf+= ';'+SgfTree.fromInt(color)+'['+SgfTree.toGnuCo(step[0]*1, step[1]*1)+']';
+			traceSgf+= ';'+SgfTree.fromInt(color)+'['+SgfTree.toGnuCo(parseInt(step[0]), parseInt(step[1]))+']';
 		}
 
 		// 如果有标记，添加标记
@@ -722,9 +734,9 @@ export default class GoboardPlayer extends EventEmitter{
 
 	// 回到主线时恢复手数展示
 	resumeOrder() {
-		if (this.cb.options.showOrder === true) {
+		if (this.cb?.options.showOrder === true) {
 			this.cb.showOrder();
-		}else if(this.cb.options.showOrder === 'last'){
+		}else if(this.cb?.options.showOrder === 'last'){
 			this.cb.showLastOrder();
 		}
 	}

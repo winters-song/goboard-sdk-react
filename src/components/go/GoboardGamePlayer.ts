@@ -16,7 +16,7 @@ export default class GoboardGamePlayer extends GoboardPlayer{
   move (node:any, silent: boolean) {
     const eaten = this.go.play(node.col, node.row, node.color);
 
-    if (null !== eaten) {
+    if (this.cb && null !== eaten) {
       this.cb.currentColor = this.cb.oppositeColor(node.color)
       //有silent时 不执行showHead
       this.cb.add(node.color, node.col, node.row, silent);
@@ -59,10 +59,10 @@ export default class GoboardGamePlayer extends GoboardPlayer{
   }
 
 	initEvents () {
-		this.cb.onPlay((color: number, col: number, row: number) => {
+		this.cb?.onPlay((color: number, col: number, row: number) => {
 
       // 确认落子，第二次落在相同位置，视为确认
-      if(this.cb.options.playConfirm && this.cb.clientColor === color){
+      if(this.cb?.options.playConfirm && this.cb.clientColor === color){
         const d = this.prePlayData
         if(!!d && d.col === col && d.row === row && d.color === color) {
           this.prePlayData = null
@@ -76,7 +76,7 @@ export default class GoboardGamePlayer extends GoboardPlayer{
       
       this.emit('play', {color, col, row})
 		});
-    this.cb.onMarkDead((col: number, row: number) => {
+    this.cb?.onMarkDead((col: number, row: number) => {
       this.emit('markdead', {col, row})
     })
 	}

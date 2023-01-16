@@ -1044,7 +1044,8 @@ export default class Goboard {
 		if(this.pieces[key]) {
 			return false;
 		}
-		if(-1 !== col && -1 !== row) {
+		// not pass
+		if(19 !== col && 19 !== row) {
 
 			this.addPiece(key, col, row, color);
 
@@ -1296,7 +1297,7 @@ export default class Goboard {
 
 		let lastMove = this.parsePlay(this.trace[last]);
 
-		if(lastMove.vertex === '-1,-1'){
+		if(lastMove.vertex === '19,19'){
 			if(last < 1){
 				return;
 			}
@@ -1379,7 +1380,7 @@ export default class Goboard {
 		for(let i = 0 ; i < this.trace.length; i++){
 			const goCo = this.trace[i].split(",");
 			//pass
-			if('-1' === goCo[0] || '-1' === goCo[1]){
+			if('19' === goCo[0] || '19' === goCo[1]){
 				continue;
 			}
 			let key = goCo[0]+","+goCo[1];

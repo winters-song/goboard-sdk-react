@@ -72,7 +72,13 @@ export class Go {
   }
 
   add (x: number, y: number, color: number, isAdd?: boolean) {
+
     let move = [x, y, color]
+
+    if(x === 19 || y === 19){
+      this.history.push(move)
+      return
+    }
     let eating = this.willEat(move)
     let eatenVertexes = new Set()
     if(isAdd){
@@ -369,12 +375,21 @@ export class Go {
     return moveResult;
   }
 
+  isPass (x: number, y: number){
+    return x === 19 || y === 19 || x === undefined || y === undefined
+  }
+
   /**
    *	交替落子
     * @return []Vertex  返回被吃掉的子
     * @return null  不能落子（有效性校验、打劫或是禁入点）
     */
-  play (x: number, y: number, color: number) {
+  play (x: number, y: number, color: number) : Set<string> | null{
+
+    if(this.isPass(x, y)){
+      this.history.push([19, 19, color]);
+      return new Set<string>();
+    }
     // 检查有效性
     // 此处有子，不能落子
     if (!this.isOnBoard(x, y) || !this.isEmpty(x, y)) {
