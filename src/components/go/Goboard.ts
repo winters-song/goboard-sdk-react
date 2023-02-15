@@ -180,7 +180,8 @@ export default class Goboard {
 			bgColor: "#F9dd98",
 			kid: false,
 			borderWidth:5,
-			lineWidth: 2
+			lineWidth: 2,
+			outerLineWidth: 2
 		},
 
 		stoneShadow: true,
@@ -407,7 +408,7 @@ export default class Goboard {
 		if(this.options.useBoardImg){
 			this.boardMesh = this.paper.image(this.options.boardImg, x, y, width, width);
 		}else{
-			const {lineColor, borderColor, bgColor, kid, borderWidth=5, lineWidth=2} = this.options.style
+			const {lineColor, borderColor, bgColor, kid, borderWidth=5, lineWidth=2, outerLineWidth=2} = this.options.style
 
 			if(this.drawCache){
 				this.clearDrawCache()
@@ -438,7 +439,7 @@ export default class Goboard {
 			const border = this.paper.rect(x0, y0, innerWidth, innerWidth)
 			.attr({
 				stroke: lineColor || borderColor,
-				'stroke-width': lineWidth,
+				'stroke-width': outerLineWidth,
 				fill: kid ? bgColor: 'none'
 			})
 
@@ -466,7 +467,7 @@ export default class Goboard {
 				for(let i=0; i< hoshi.length; i++ ){
 					const x = hoshi[i][0] * this.options.UNIT_LENGTH + this.offsetX + this.originX
 					const y = hoshi[i][1] * this.options.UNIT_LENGTH + this.offsetY + this.originY
-					const dot = this.paper.circle(x, y, 6).attr({
+					const dot = this.paper.circle(x, y, 5).attr({
 						fill: lineColor || borderColor,
 						'stroke-width': 0
 					});
