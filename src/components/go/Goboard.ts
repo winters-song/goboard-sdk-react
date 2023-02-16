@@ -1534,6 +1534,17 @@ export default class Goboard {
 		}
 	}
 
+	drawTerritories(arr: number[]) {
+		for(let i = 0 ; i< this.options.boardSize ;i++) {
+			for (let j = 0; j < this.options.boardSize; j++) {
+				const key = `${j},${i}`;
+				const index = j + i * this.options.boardSize;
+				const color = arr[index]>=0? 1: 2;
+				this.addPlace(key,  j,  i, color, Math.abs(arr[index]))
+			}
+		}
+	}
+
 	drawPlaces (color: number, vertexes: any){
 		for(let i = 0 ;i<vertexes.length ;i++) {
 			let key = vertexes[i].Col + "," + vertexes[i].Row;
@@ -1541,7 +1552,7 @@ export default class Goboard {
 		}
 	}
 
-	addPlace (key:string, col: number, row: number, color: number) {
+	addPlace (key:string, col: number, row: number, color: number, opacity?: number) {
 		const co = this.go2ph(col,row);
 
 		let fill;
@@ -1558,7 +1569,7 @@ export default class Goboard {
 
 		this.places[key] = this.paper?.rect(co[0] - offset, co[1] - offset, this.options.PLACE_WIDTH, this.options.PLACE_WIDTH).attr({
 			fill: fill,
-			opacity: 0.7
+			opacity: opacity === undefined ? 0.7: opacity
 		});
 
 	}
