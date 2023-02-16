@@ -181,7 +181,9 @@ export default class Goboard {
 			kid: false,
 			borderWidth:5,
 			lineWidth: 2,
-			outerLineWidth: 2
+			outerLineWidth: 2,
+			stoneOffsetX: 0,
+			stoneOffsetY: 0,
 		},
 
 		stoneShadow: true,
@@ -1071,8 +1073,8 @@ export default class Goboard {
 		}
 
 		this.pieces[key] = ball(this.paper, {
-			x: co[0],
-			y: co[1],
+			x: co[0] + this.options.style.stoneOffsetX,
+			y: co[1] + this.options.style.stoneOffsetY,
 			r: this.options.PIECE_RADIUS,
 			color,
 			shadow: this.options.stoneShadow,
