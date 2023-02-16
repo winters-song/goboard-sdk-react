@@ -147,6 +147,7 @@ export class SgfNode {
 
 export class SgfMoveNode extends SgfNode {
 	color?: number
+	isUserBranch?: boolean;
 	constructor(col?: number , row?: number , color?: number) {
 		super();
 		this.col = col;

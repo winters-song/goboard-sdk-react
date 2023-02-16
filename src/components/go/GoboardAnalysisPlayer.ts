@@ -1,6 +1,6 @@
 
 import GoboardPlayer from "./GoboardPlayer";
-import {SgfMoveNode} from "./SgfTree"
+import {SgfMoveNode, SgfNode} from "./SgfTree"
 
 /*
 *
@@ -12,8 +12,13 @@ import {SgfMoveNode} from "./SgfTree"
 * */
 export default class GoboardAnalysisPlayer extends GoboardPlayer{
 
+	isUserBranch=false;
+
 	initEvents () {
-		this.cb.onPlay((color, col, row) => {
+		if (!this.cb){
+			return
+		}
+		this.cb.onPlay((color: number, col: number, row: number) => {
 
 			//有棋子的地方不能落子，否则步数出问题
 			if (!this.go.canPlay(col, row, color)) {
@@ -56,7 +61,7 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 	/*
 	* 下一步是否存在该分支： 存在时返回分支index， 不存在返回index
 	* */
-	getBranchIndex(col, row){
+	getBranchIndex(col: number, row: number){
 		const children = this.currentNode.children
 		if(children){
 			for(let i = 0; i< children.length; i++){
@@ -70,6 +75,10 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 
 	// 进入试下
 	enterUserBranch () {
+		if (!this.cb){
+			return
+		}
+
 		this.cb.setReadonly(false);
 		// 第0步时，需要判断第一手颜色
 		if(!this.cb.trace.length && this.sgfTree && this.sgfTree.root.children && this.sgfTree.root.children[0].color){
@@ -91,6 +100,10 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 	}
 
 	closeUserBranch() {
+		if (!this.cb){
+			return
+		}
+
 		this.toStart()
 		this.isUserBranch = false
 		this.inBranch = false
@@ -101,7 +114,11 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 		this.resumeOrder()
 	}
 
-	enterAIBranch (index){
+	enterAIBranch (index: number){
+		if (!this.cb){
+			return
+		}
+
 		// 进入分支前，先返回上一步
 		this.backward(true);
 
@@ -133,6 +150,10 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 	}
 
 	closeAIBranch() {
+		if (!this.cb){
+			return
+		}
+
 		this.cb.branch = false;
 		this.inBranch = false
 
@@ -152,7 +173,7 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 		};
 	}
 
-	saveAIMaster (index) {
+	saveAIMaster (index: number) {
 		this.master = {
 			branchNode: this.currentNode.children[index], //用于判定上一步是否到了分支第一步， 如果是第一步，则不可以退到上一步
 			branchStep: this.currentStep, //用于退出分支时，恢复原来位置
@@ -162,21 +183,23 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 	/*
 	* 上一步时，如果是试下，并且不是AI分支，删除当前节点。
 	* */
-	removeBranchNode(node){
-		let index = node.parent.children.indexOf(node)
-		node.parent.children.splice(index, 1)
+	removeBranchNode(node: SgfNode){
+		let index = node.parent?.children?.indexOf(node)
+		if(index !== undefined){
+			node.parent?.children?.splice(index, 1)
+		}
 	}
 
 	toStart () {
 		this.fastBackward(1000);
-		this.cb.setCurrentColor();
+		this.cb?.setCurrentColor();
 
 		if(!this.isUserBranch){
 			this.currentStep = 0;
 		}
 	}
 
-	forward (silent) {
+	forward (silent?: boolean) {
 		let node = this.getNextNode()
 		if (!node) {
 			return;
@@ -196,10 +219,10 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 		return true;
 	}
 
-	backward (silent) {
+	backward (silent?: boolean) {
 
-		if(this.isBranchFirst()){
-			return;
+		if(this.isBranchFirst() || !this.cb){
+			return false;
 		}
 
 		if(!this.isUserBranch){
@@ -220,8 +243,8 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 		this.cb.removePiece(node.col + "," + node.row);
 
 		if (moveResult && moveResult.eated && moveResult.eated.size > 0) {
-			moveResult.eated.forEach(move => {
-				this.cb.recoverPiece(move.col, move.row, move.color);
+			moveResult.eated.forEach((move: any) => {
+				this.cb?.recoverPiece(move.col, move.row, move.color);
 			});
 		}
 
@@ -270,7 +293,7 @@ export default class GoboardAnalysisPlayer extends GoboardPlayer{
 	/**
 	 *  胜率图联动，切换手数
 	 */
-	onJump (step){
+	onJump (step: number){
 		// if(this.isUserBranch){
 		// 	this.closeUserBranch();
 		// }
