@@ -604,7 +604,7 @@ export default class Goboard {
 			stroke: color,
 			'stroke-width': 4
 		}).hide()
-		this.helperLineDummy = this.paper?.image(this.blackImg, x, y, 2*r, 2*r ).hide().attr({
+		this.helperLineDummy = this.paper?.image(this.blackImg, x + this.options.style.stoneOffsetX, y + this.options.style.stoneOffsetY, 2*r, 2*r ).hide().attr({
 			opacity: 0.85
 		})
 		// window.helperLineDummy = this.helperLineDummy
@@ -796,7 +796,7 @@ export default class Goboard {
 					dummy?.attr({x, y});
 					break;
 				default:
-					dummy?.attr({cx: x + this.options.style.stoneOffsetX, cy: y + this.options.style.stoneOffsetY});
+					dummy?.attr({cx: x, cy: y});
 				}
 
 				this.intersects = true;
