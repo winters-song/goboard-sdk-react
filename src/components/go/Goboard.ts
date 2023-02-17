@@ -796,7 +796,7 @@ export default class Goboard {
 					dummy?.attr({x, y});
 					break;
 				default:
-					dummy?.attr({cx: x, cy: y});
+					dummy?.attr({cx: x + this.options.style.stoneOffsetX, cy: y + this.options.style.stoneOffsetY});
 				}
 
 				this.intersects = true;
