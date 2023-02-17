@@ -617,7 +617,7 @@ export default class Goboard {
 		const x = col * this.options.UNIT_LENGTH + this.originX + this.offsetX;
 		const y = row * this.options.UNIT_LENGTH + this.originY + this.offsetY;
 		this.helperLineCircle?.attr({ cx : x , cy: y });
-		this.helperLineDummy?.attr({x : x - this.options.PIECE_RADIUS, y: y - this.options.PIECE_RADIUS});
+		this.helperLineDummy?.attr({x : x - this.options.PIECE_RADIUS + this.options.style.stoneOffsetX, y: y - this.options.PIECE_RADIUS + this.options.style.stoneOffsetY});
 
 		this.helperLineX?.attr("path", pos[0])
 		this.helperLineY?.attr("path", pos[1])
