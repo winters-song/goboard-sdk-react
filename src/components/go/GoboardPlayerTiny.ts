@@ -262,4 +262,24 @@ export default class GoboardPlayer extends EventEmitter{
 
 		this.init({sgfTree, whoFirst: whoFirst || Color.BLACK, boardSize});
 	}
+
+	doMove(col: number, row: number, color: number) {
+		//  pass
+		if( col === 19 && row === 19){
+			//   do nothing
+		}else if (!this.go.canPlay(col, row, color)) {
+			console.log("非法落子")
+			return;
+		}
+
+		this.currentStep += 1
+
+		//创建节点
+		let node = new SgfMoveNode(col, row, color);
+		node.parent = this.currentNode;
+		this.currentNode.children = [node]
+		this.currentNode = node;
+
+		this.move(node)
+	}
 }
