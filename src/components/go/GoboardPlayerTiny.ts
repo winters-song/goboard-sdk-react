@@ -47,6 +47,12 @@ export default class GoboardPlayer extends EventEmitter{
 			return
 		}
 
+		Object.assign(this, {
+			currentStep: 0,
+			root: cfg.sgfTree.root,
+			currentNode: cfg.sgfTree.root,
+		},cfg)
+
 		this.go = new Go(this.boardSize);
 
 		//渲染Added Stone
