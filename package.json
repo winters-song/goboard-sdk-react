@@ -1,6 +1,6 @@
 {
   "name": "goboard-sdk-react",
-  "version": "0.2.17",
+  "version": "0.2.18",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "less-loader": "^11.0.0",
@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@types/raphael": "^2.3.3",
-    "antd": "^5.2.3",
+    "antd": "5.1",
     "classnames": "^2.3.1",
     "customize-cra": "^1.0.0",
     "customize-cra-less-loader": "^2.0.0",
