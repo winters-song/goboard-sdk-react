@@ -278,7 +278,11 @@ export default class Goboard {
 
 		// window.Goboard = this
 
+		const style = this.options.style
 		Object.assign(this.options, cfg);
+		if(cfg.style){
+			Object.assign(this.options.style, style, cfg.style);
+		}
 
 		this.blackImg = cfg.blackImg || blackImg;
 		this.whiteImg = cfg.whiteImg || whiteImg;
